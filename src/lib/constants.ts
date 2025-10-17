@@ -1,0 +1,5 @@
+export const REWARD_CONFIG = {
+    DAILY_QUEST_REWARD: 50,
+    DEFAULT_REWARD: 20,
+    GACHA_COST: 100,
+};

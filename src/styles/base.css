@@ -1,0 +1,122 @@
+/* src/styles/base.css */
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  /* Define default theme colors in case the variables aren't set dynamically */
+  --blob-color-1-default: #57025a; 
+  --blob-color-2-default: #ec4899;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* ======================================= */
+/* ADDED: GLOBAL THEME COLORS AND LAYOUTS */
+/* ======================================= */
+
+/* Custom colors for the dark, glassy theme */
+.bg-custom-purple {
+    background-color: #57025a; /* Dark Purple */
+}
+
+.bg-custom-pink {
+    background-color: #ec4899; /* Pink/Magenta */
+}
+
+.border-custom-pink {
+    border-color: #ec4899;
+}
+
+/* 1. Blob Color Classes: Uses the injected CSS variables */
+.blob-color-1 {
+    /* Use the dynamically injected variable, falling back to default */
+    background-color: var(--blob-color-1, var(--blob-color-1-default)); 
+}
+
+.blob-color-2 {
+    background-color: var(--blob-color-2, var(--blob-color-2-default));
+}
+
+/* 2. Dynamic Background Container: Holds static image properties */
+.themed-background-container {
+    /* Set fixed background properties */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    /* Apply subtle opacity to the image so content is readable */
+    opacity: 0.7; 
+}
+
+
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  /* ======================================= */
+  /* ADDITIONS FROM LOGIN.CSS FOR BASE STYLING */
+  /* ======================================= */
+
+  /* Global Input Styles (for glass look) */
+  input {
+    width: 90%;
+    padding: 12px;
+    border-radius: 10px;
+    margin: 10px 0;
+    /* Use transparent background and white text */
+    background-color: rgba(255, 255, 255, 0.1); 
+    color: #ffffff;
+    font-size: 1rem;
+    border: none;
+    outline: none;
+    transition: 0.3s;
+  }
+
+  input:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-style: italic;
+  }
+  
+  /* You may need this if you use the password-full-width class */
+  .password-full-width input {
+    width: 100% !important;
+  }
+  
+  /* Global Button Styles (You can apply the hover/base color using Tailwind utilities 
+     or keep this custom class if the gradient hover is complex) 
+  */
+  button:not([class*="bg-"]) { /* Avoid overriding Tailwind-styled buttons */
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+}
+
+/* Custom class for the specific button hover gradient */
+.button-theme-hover:hover {
+  background: linear-gradient(to right, #f97316, #ec4899, #57025a);
+}
+
+/* Remove or redefine #passport styles as they are highly specific to the login page */
+/* @keyframes passport should also be moved if it's only used on the login page */

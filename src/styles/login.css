@@ -1,0 +1,87 @@
+@import "tailwindcss";
+/* =============== LOGIN UI ONLY =============== */
+.container {
+   
+  -webkit-backdrop-filter: blur(20px);
+   backdrop-filter: blur(20px);
+  border-radius: 20px;
+  position: relative;
+  z-index: 10;
+  border-bottom: 5px solid rgba(255, 255, 255, 0.3);
+  border-left: 5px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.05); /* glassy */
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 45px rgba(0, 0, 0, 0.5);
+}
+
+/* Add this to your CSS file */
+.password-full-width input {
+    width: 100% !important; /* Force it to override the 90% rule */
+}
+
+#passport {
+  width: 120px;
+  border-radius: 50%;
+  border: 5px solid white;
+  margin-bottom: 20px;
+  animation: passport 6s linear infinite alternate;
+}
+
+input {
+  width: 90%;
+  padding: 12px;
+  border-radius: 10px;
+  margin: 10px 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1rem;
+  border: none;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-style: italic;
+}
+
+button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: linear-gradient(to right, #f97316, #ec4899, #57025a);
+}
+
+/* Avatar border animation */
+@keyframes passport {
+  0% {
+    border-color: #cc2b5e;
+  }
+  25% {
+    border-color: rebeccapurple;
+  }
+  50% {
+    border-color: tomato;
+  }
+  75% {
+    border-color: yellow;
+  }
+  100% {
+    border-color: green;
+  }
+}

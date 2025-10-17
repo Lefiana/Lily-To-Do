@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role{
+  USER
+  ADMIN 
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  role      Role     @default(USER)
+  todos     Todo[]
+  gachas    Gacha[]
+  currency  Currency?
+  activeThemeItemId String?
+  activeThemeItem Item? @relation("ActiveUserTheme", fields: [activeThemeItemId], references: [id])
+}
+
+model Todo {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  category    String    @default("dailyquest")
+  progress    Int       @default(0)
+  completed   Boolean   @default(false)
+  dailyQuest  Boolean   @default(false)
+  deadline    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  repeatDaily Boolean   @default(false)
+}
+
+
+model Gacha{
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  itemId      String
+  item        Item     @relation(fields: [itemId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Currency{
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  imageURL    String?
+  rarity      Int
+  color1      String?  // Hex color for gradient start
+  color2      String?  // Hex color for gradient end
+  createdAt   DateTime @default(now())
+  gachas      Gacha[]
+  activeUsers User[]  @relation("ActiveUserTheme")
+}
