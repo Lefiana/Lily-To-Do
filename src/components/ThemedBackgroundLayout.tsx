@@ -27,18 +27,20 @@ export function ThemedBackgroundLayout({
     // 1. Inject custom colors as CSS Variables (Custom Properties)
     '--blob-color-1': blobColor1,
     '--blob-color-2': blobColor2,
-
+    backgroundSize: 'cover', // 🎯 Changed from 'cover' to 'contain' for full image visibility
+    backgroundPosition: 'center top', // Center the image
+    backgroundRepeat: 'no-repeat',
     // 2. Dynamic background image setting
     ...(backgroundUrl && {
       backgroundImage: `url('${backgroundUrl}')`,
     }),
   } as React.CSSProperties; // Type assertion for custom properties
-
   return (
     // Outer container: Applies dynamic style and centering
     <div 
       // Use bg-gray-900 as a fallback solid color if no image is provided
-      className={`relative flex items-center justify-center min-h-screen overflow-hidden p-6 ${!backgroundUrl ? 'themed-background-container' 
+      className={`relative flex items-center justify-center min-h-screen overflow-hidden p-6 ${!backgroundUrl ? 
+        'themed-background-container' 
         : 'bg-gray-900' }`}
       style={dynamicStyles} 
     >
@@ -47,7 +49,8 @@ export function ThemedBackgroundLayout({
         className="absolute w-[300px] h-[300px] rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse blob-color-1"
       />
       <div 
-        className="absolute w-[320px] h-[320px] rounded-full blur-3xl opacity-30 bottom-10 right-10 animate-pulse delay-1000 blob-color-2" 
+        className="absolute w-[320px] h-[320px] rounded-full blur-3xl opacity-30 bottom-10 right-10 
+        animate-pulse delay-1000 blob-color-2" 
       />
 
       {/* Main content wrapper: Ensures children are vertically and horizontally centered.
@@ -59,3 +62,4 @@ export function ThemedBackgroundLayout({
     </div>
   );
 }
+

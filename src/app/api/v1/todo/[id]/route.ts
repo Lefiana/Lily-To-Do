@@ -4,7 +4,7 @@ import { getUserIdFromSession } from "@/lib/session";
 
 
 //PUT by ID /api/v1/todo/id
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     const userId = await getUserIdFromSession();
 
     if (!userId) {
@@ -12,7 +12,7 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
         return NextResponse.json({error: "Unauthorized"}, {status: 401});
     }
 
-    const todoId = context.params.id;
+    const todoId = (await context.params).id;
     try{
         const body = await req.json();
         const {title, description, category, dailyQuest, repeatDaily} = body;
@@ -43,7 +43,7 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
 }
 
 // Patch by ID /api/v1/todo/id
-export async function PATCH(req: NextRequest,context: { params: { id: string } }) {
+export async function PATCH(req: NextRequest,context: { params: Promise<{ id: string }> }) {
     const userId = await getUserIdFromSession();
 
     if (!userId) {
@@ -51,7 +51,7 @@ export async function PATCH(req: NextRequest,context: { params: { id: string } }
         return NextResponse.json({error: "Unauthorized"}, {status: 401});
     }
 
-    const todoId = context.params.id;
+    const todoId = (await context.params).id;
 
     try{
         const body = await req.json();
@@ -87,14 +87,14 @@ export async function PATCH(req: NextRequest,context: { params: { id: string } }
 }
 
 //GET by Id /api/v1/todo/id
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     const userId = await getUserIdFromSession();
     if (!userId) {
         // Return 401 even though middleware should catch it, for safety.
         return NextResponse.json({error: "Unauthorized"}, {status: 401});
     }
 
-    const todoId = context.params.id;
+    const todoId = (await context.params).id;
 
     try{
         const todos = await prisma.todo.findFirst({
@@ -129,8 +129,8 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
 }
 
 //DELETE by ID /api/v1/todo/id
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
-  const { params } = await context;
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const params = await context.params;
   const userId = await getUserIdFromSession();
 
   if (!userId) {

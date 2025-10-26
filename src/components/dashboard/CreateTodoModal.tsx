@@ -4,23 +4,33 @@
 import React, { useState } from 'react';
 import { useTodos } from '@/hooks/useTodos';
 import { GlassCard } from '@/components/dashboard/GlassCard';
-
+import toast from 'react-hot-toast';
 interface CreateTodoModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
 export const CreateTodoModal: React.FC<CreateTodoModalProps> = ({ isOpen, onClose }) => {
-    const { createTodo } = useTodos();
+    const { createTodo, todos, revalidate } = useTodos();  // Add 'todos' to the destructured hook
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [isDailyQuest, setIsDailyQuest] = useState(false);
 
     if (!isOpen) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!title.trim()) return;
+
+        // Rate limiting check: Prevent creating more than 3 active daily quests
+        if (isDailyQuest) {
+            await revalidate();
+            const existingDailyQuests = todos?.filter(t => t.dailyQuest && !t.completed) || [];
+            if (existingDailyQuests.length >= 3) {
+                toast.error("You already have 3 active daily quests today."); 
+                return;  // Prevent submission
+            }
+        }
 
         createTodo({
             title: title.trim(),
@@ -41,7 +51,7 @@ export const CreateTodoModal: React.FC<CreateTodoModalProps> = ({ isOpen, onClos
         // Modal Backdrop
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center backdrop-blur-sm" onClick={onClose}>
             {/* Modal Content - Prevent closing when clicking inside */}
-            <GlassCard className="w-full max-w-md p-6 relative" onClick={(e) => e.stopPropagation()}>
+            <GlassCard className="w-full max-w-md p-6 relative" onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
                 <h2 className="text-2xl font-bold text-white mb-6 border-b border-white/20 pb-2">
                     Create New Task
                 </h2>
@@ -81,7 +91,7 @@ export const CreateTodoModal: React.FC<CreateTodoModalProps> = ({ isOpen, onClos
                             onChange={(e) => setIsDailyQuest(e.target.checked)}
                             className="w-4 h-4 text-pink-400 bg-gray-700 border-gray-600 rounded focus:ring-pink-500"
                         />
-                        <span>Mark as **Daily Quest** (Bonus Reward)</span>
+                        <span>Mark as **Urgent** (Bonus Reward)</span>
                     </label>
 
                     <div className="flex justify-end space-x-3 pt-4">

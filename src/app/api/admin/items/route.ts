@@ -1,3 +1,4 @@
+// /api/admin/items
 import { NextRequest, NextResponse } from "next/server";
 import { getRequiredAuth } from "@/lib/auth-helper";
 import { prisma } from "@/lib/prisma";

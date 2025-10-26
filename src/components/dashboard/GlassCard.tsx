@@ -1,43 +1,39 @@
-// src/components/GlassCard.tsx - UPDATED
+// src/components/GlassCard.tsx
 import React from 'react';
+import { HTMLAttributes, forwardRef } from 'react'; // 🎯 Add forwardRef
 
-interface GlassCardProps {
-  children: React.ReactNode;
-  className?: string;
+// ✅ Updated: Use forwardRef to support refs
+export interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
+  // The 'className' and other props are already included via HTMLAttributes.
 }
 
-/**
- * Reusable component applying the custom "glass" effect from the original login CSS.
- */
-export const GlassCard: React.FC<GlassCardProps> = ({ children, className = '' }) => {
-  return (
-    <div
-      className={`
-        relative z-10 p-6 rounded-[20px] transition-all duration-300 
-        
-        // Match .container styles
-        // backdrop-filter: blur(20px)
-        backdrop-blur-[20px] 
-        
-        // background-color: rgba(255, 255, 255, 0.05)
-        bg-[rgba(255,255,255,0.05)] 
-        
-        // border-bottom/left: 5px solid rgba(255, 255, 255, 0.3)
-        border-b-[5px] border-l-[5px] border-[rgba(255,255,255,0.3)]
-        
-        // box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4)
-        shadow-black/40
-        
-        // hover: transform: translateY(-2px) and adjusted shadow
-        hover:-translate-y-[2px] hover:shadow-2xl hover:shadow-black/60
-        
-        ${className}
-      `}
-    >
-      {children}
-    </div>
-  );
-};
+export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
+  ({ children, className, ...props }, ref) => { // 🎯 Add ref parameter
+    return (
+      <div
+        ref={ref} // 🎯 Forward the ref to the div
+        className={`
+          relative z-10 p-6 rounded-[20px] transition-all duration-300
+          
+          // Match .container styles
+          backdrop-blur-[20px] 
+          
+          bg-[rgba(255,255,255,0.4)] 
+          
+          border-b-[5px] border-l-[5px] border-[rgba(255,255,255,0.3)]
+          
+          shadow-black/40
+          
+          hover:-translate-y-[2px] hover:shadow-2xl hover:shadow-black/60
+          ${className}
+        `}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
-// NOTE: You must ensure Tailwind's JIT mode is active (which it is in Next.js App Router)
-// for these arbitrary values (like backdrop-blur-[20px] and bg-[...]) to work correctly.
+// 🎯 Add display name for better debugging
+GlassCard.displayName = 'GlassCard';

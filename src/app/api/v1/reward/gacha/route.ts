@@ -1,11 +1,13 @@
+//api/v1/reward/gacha
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserIdFromSession } from "@/lib/session";
 import { REWARD_CONFIG } from "@/lib/constants"; 
 import { selectRandomItem } from "@/lib/gacha";
+import { Role } from "@prisma/client";
 
 // Define the cost for this specific gacha
-const GACHA_COST = REWARD_CONFIG.GACHA_COST || 100;
+const GACHA_COST = REWARD_CONFIG.GACHA_COST || 2000;
 
 export async function POST(req: NextRequest) {
     const userId = await getUserIdFromSession();
@@ -13,6 +15,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Ensure only admin users can access this route
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+    });
+
+    if (user?.role !== Role.ADMIN) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
     try {
         // --- 1. Fetch all Items from DB to create the dynamic pool ---
         const availableItems = await prisma.item.findMany({

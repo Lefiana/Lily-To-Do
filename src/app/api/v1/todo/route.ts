@@ -9,9 +9,7 @@ import { getUserIdFromSession } from "@/lib/session";
  */
 export async function POST(req: NextRequest) {
   const userId = await getUserIdFromSession();
-
   if (!userId) {
-    // Return 401 even though middleware should catch it, for safety.
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -24,16 +22,33 @@ export async function POST(req: NextRequest) {
       dailyQuest = false,
       repeatDaily = false,
     } = body;
-    // NOTE: We removed 'userId' from destructuring, as we use the secure one above.
 
     if (!title) {
-      return NextResponse.json(
-        { error: "Missing required field: title" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing required field: title" }, { status: 400 });
     }
 
-    // Set a 24h deadline if dailyQuest or repeatDaily is true
+    // Limit creation of dailyQuest (urgent) tasks
+    if (dailyQuest) {
+      const now = new Date();
+      const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+
+      const urgentCount = await prisma.todo.count({
+        where: {
+          userId,
+          dailyQuest: true,
+          createdAt: { gte: startOfDay },
+        },
+      });
+
+      if (urgentCount >= 3) {
+        return NextResponse.json(
+          { error: "You can only create 3 daily quests per day." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Auto deadline (24h)
     const deadline =
       dailyQuest || repeatDaily
         ? new Date(Date.now() + 24 * 60 * 60 * 1000)
@@ -41,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     const newTodo = await prisma.todo.create({
       data: {
-        userId, 
+        userId,
         title,
         description,
         category,
@@ -53,11 +68,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newTodo, { status: 201 });
   } catch (error) {
-    // Catch JSON parsing errors or Prisma database errors
     console.error("Error creating todo:", error);
     return NextResponse.json({ error: "Failed to create todo" }, { status: 500 });
   }
 }
+
 
 // ------------------------------------------------------------------------------------------------
 

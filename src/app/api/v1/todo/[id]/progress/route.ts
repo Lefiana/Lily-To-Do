@@ -2,13 +2,13 @@ import {NextResponse, NextRequest} from "next/server";
 import {prisma} from "@/lib/prisma";
 import { getUserIdFromSession } from "@/lib/session";
 //patch to update progress by ID /api/v1/todo/id/progress
-export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     const userId = await getUserIdFromSession();
     if (!userId) {
         // Return 401 even though middleware should catch it, for safety.
         return NextResponse.json({error: "Unauthorized"}, {status: 401});
     }
-    const todoId = context.params.id;
+    const todoId = (await context.params).id;
     try{
         const body = await req.json();
         const {progress} = body;

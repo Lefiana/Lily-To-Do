@@ -3,41 +3,19 @@
 
 import React, { useState } from 'react';
 import { GlassCard } from '@/components/dashboard/GlassCard';
-import { useTodos, Todo } from '@/hooks/useTodos'; // 🎯 Import the hook and type
-
+import { useTodos, Todo } from '@/hooks/useTodos'; 
+import { CreateTodoModal } from './CreateTodoModal';
+import { EditTodoModal } from './EditTodoModal';
 export const ToDoListCard: React.FC = () => {
-    // 🎯 Call the hook to access data and mutations
-    const { todos, isLoading, error, createTodo, markCompleted, deleteTodo } = useTodos();
-    const [newTodoTitle, setNewTodoTitle] = useState('');
-    const [isDailyQuest, setIsDailyQuest] = useState(false);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newTodoTitle.trim()) {
-            // 🎯 FIX: Provide all required properties, even with default/null values
-            createTodo({ 
-                title: newTodoTitle.trim(), 
-                description: null, // Required by Pick<Todo, ...>
-                category: isDailyQuest ? 'dailyquest' : 'default', // Use the toggle state
-                dailyQuest: isDailyQuest, // Required by Pick<Todo, ...>
-                repeatDaily: false, // Required by Pick<Todo, ...>
-            }); 
-            
-            setNewTodoTitle('');
-            setIsDailyQuest(false); // Reset toggle after submission
-        }
-    };
+    // 🎯 Call the hook to access data and mutations hooks and modal
+    const { todos, isLoading, error, createTodo, markCompleted, deleteTodo } = useTodos(); 
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
     const handleToggleCompleted = (todo: Todo) => {
         // 🎯 Use the markCompleted function to toggle completion status
         markCompleted(todo.id, !todo.completed); 
-    };
-
-    const handleDelete = (id: string) => {
-        // 🎯 Use the deleteTodo function
-        if (window.confirm("Are you sure you want to delete this task?")) {
-            deleteTodo(id);
-        }
     };
 
     // Filter and sort for display: incomplete tasks first, then completed ones
@@ -48,91 +26,143 @@ export const ToDoListCard: React.FC = () => {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // Newest first
     });
 
-    return (
-        <GlassCard className="h-full w-full flex flex-col">
-            <h2 className="text-xl font-semibold text-white mb-4 border-b border-white/20 pb-2">
-                To Do 📝
-            </h2>
-            
-            <div className="flex-grow overflow-y-auto space-y-3 text-gray-300 pr-2">
-                {isLoading && <p>Loading tasks...</p>}
-                {error && <p className="text-red-400">Error loading tasks.</p>}
-                
-                {sortedTodos.map(todo => (
-                    <div key={todo.id} className="flex items-start justify-between p-2 bg-white/5 rounded-md hover:bg-white/10 transition duration-100">
-                        <div className="flex items-center space-x-2 flex-grow">
-                            <input 
-                                type="checkbox" 
-                                checked={todo.completed} 
-                                onChange={() => handleToggleCompleted(todo)}
-                                // ✅ A11Y FIX: Describe the checkbox purpose for screen readers
-                                aria-label={`Mark task "${todo.title}" as complete`} 
-                                className="w-5 h-5 text-pink-400 bg-gray-700 border-gray-600 rounded focus:ring-pink-500"
-                            />
-                            <span className={`text-sm ${todo.completed ? "line-through opacity-60 text-gray-400" : "text-white"}`}>
-                                {todo.title}
-                                {todo.dailyQuest && (
-                                    <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/50 rounded-full text-yellow-200">
-                                        Daily
-                                    </span>
-                                )}
-                            </span>
-                        </div>
-                        <button 
-                            onClick={() => handleDelete(todo.id)} 
-                            // ✅ A11Y FIX: Add a title attribute for button context
-                            title={`Delete task: ${todo.title}`}
-                            className="text-red-400 opacity-70 hover:opacity-100 text-sm ml-2"
-                        >
-                            ×
-                        </button>
-                    </div>
-                ))}
+    const handleEditClick = (todo: Todo) => {
+        setSelectedTodo(todo);
+        setIsEditModalOpen(true);
+    };
 
-                {sortedTodos.length === 0 && !isLoading && !error && (
-                    <p className="text-center text-gray-500 mt-4">No tasks yet. Add one!</p>
-                )}
-            </div>
-
-            {/* Input area for new tasks */}
-            {/* ✅ Restructured form to include the Daily Quest toggle */}
-            <form onSubmit={handleSubmit} className="mt-4 flex flex-col space-y-2">
-                
-                {/* 1. New Task Title Input */}
-                <div className="flex space-x-2">
-                    <label htmlFor="newTodoTitle" className="sr-only">New task title</label> {/* Hidden label for A11Y */}
-                    <input
-                        id="newTodoTitle" // ✅ Added ID to associate with the label
-                        type="text"
-                        value={newTodoTitle}
-                        onChange={(e) => setNewTodoTitle(e.target.value)}
-                        placeholder="New task title..." // Placeholder is fine now
-                        className="flex-grow !p-2 !text-sm !bg-white/10 !rounded-md !border-none text-white focus:ring-pink-500"
-                    />
-                    <button 
-                        type="submit" 
-                        title="Add New Task"
-                        className="bg-blue-500/80 hover:bg-blue-600 !p-2 !rounded-md !text-sm text-white font-medium whitespace-nowrap"
+ return (
+        <>
+            <GlassCard className="h-full w-full flex flex-col min-w-0"> 
+                <h2 className="text-xl font-semibold text-white mb-4 border-b border-white/20 pb-2 readable-text">
+                    To Do 📝
+                </h2>
+                                {/* Add Task Button */}
+                <div className="mt-4">
+                    <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="w-full bg-pink-600/80 hover:bg-pink-500 text-white 
+                        font-bold py-2 rounded-lg transition duration-150 shadow-lg"
                     >
-                        Add
+                        + Add Task
                     </button>
                 </div>
 
-                {/* 2. Daily Quest Toggle */}
-                <label htmlFor="isDailyQuest" className="flex items-center space-x-2 text-sm text-white/80">
-                    <input 
-                        id="isDailyQuest" // ✅ Added ID
-                        type="checkbox" 
-                        // Assuming you added: const [isDailyQuest, setIsDailyQuest] = useState(false);
-                        checked={isDailyQuest} 
-                        onChange={(e) => setIsDailyQuest(e.target.checked)}
-                        className="w-4 h-4 text-pink-400 bg-gray-700 border-gray-600 rounded focus:ring-pink-500"
-                    />
-                    <span>Mark as Daily Quest? (Awards bonus currency on completion)</span>
-                </label>
+                <div className="flex-grow overflow-y-auto overflow-x-hidden space-y-2 text-gray-300 pr-2">
+                    {isLoading && <p>Loading tasks...</p>}
+                    {error && <p className="text-red-400">Error loading tasks.</p>}
+                    
+                    {sortedTodos.map(todo => (
+                        // Parent Wrapper
+                        <div 
+                            key={todo.id} 
+                            className="flex items-center 
+                            justify-between p-2 min-h-[3.5rem] bg-white/5 rounded-lg 
+                            transition duration-150 hover:bg-white/10 group readable-text" 
+                        >
+                            {/* 1. LEFT DOORS: Toggle Complete */}
+                            <label 
+                                className="flex items-center space-x-3 cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation(); 
+                                    handleToggleCompleted(todo);
+                                }}
+                            >
+                                <div 
+                                    // Main container for the Checkbox Doors
+                                    className="w-8 h-8 relative [perspective:100px] shrink-0"
+                                >
+                                    {/* Left Door (Pink Accent) */}
+                                    <div 
+                                        className={`absolute w-1/2 h-full top-0 bg-gray-700 border border-gray-900 
+                                                    transition-transform duration-600 
+                                                    [transform-origin:left] ${todo.completed ? '[transform:rotateY(-110deg)]' : ''}`}
+                                    />
+                                    {/* Right Door (Pink Accent) */}
+                                    <div 
+                                        className={`absolute w-1/2 h-full top-0 right-0 bg-gray-700 
+                                            border border-gray-900 transition-transform duration-600 
+                                                    [transform-origin:right] ${todo.completed ? '[transform:rotateY(110deg)]' : ''}`}
+                                    />
+                                    {/* Checkmark (Pink) */}
+                                    <span 
+                                        className={`absolute top-1/2 left-1/2 -translate-x-1/2 
+                                            -translate-y-1/2 text-lg text-pink-400 drop-shadow-lg transition-transform duration-400 
+                                                    ${todo.completed ? 'scale-100' : 'scale-0'}`}
+                                    >
+                                        ✓
+                                    </span>
+                                </div>
+                            </label>
+                            
+                            {/* 2. Middle Section: Task Title and Badge (Hover for Description) */}
+                            <div 
+                                className={`flex-grow mx-4 flex flex-col justify-center relative min-w-0 
+                                            ${todo.completed ? 'opacity-60 text-gray-400' : 'text-white'}`}
+                            >
+                                <p className="text-base font-medium break-words">
+                                    {todo.title}
+                                </p>
+                                
+                                {/* DESCRIPTION ON HOVER (Simple Popup) */}
+                                {todo.description && (
+                                    <div className="absolute left-1/2 top-0 mt-8 w-64 p-3 bg-gray-800 border border-gray-600 rounded-lg shadow-xl text-xs text-gray-200 z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                        <p className="font-semibold mb-1">Description:</p>
+                                        {todo.description}
+                                    </div>
+                                )}
+                            </div>
 
-            </form>
+                            {/* RIGHT SIDE: DAILY + EDIT DOORS */}
+                            <div className="flex items-center space-x-2">
+                                {todo.dailyQuest && (
+                                <span className="px-2 py-0.5 text-xs font-semibold bg-yellow-700/50 
+                                rounded-full text-yellow-100 whitespace-nowrap">
+                                    Urgent
+                                </span>
+                                )}
 
-        </GlassCard>
+                                <label
+                                className="flex items-center cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditClick(todo);
+                                }}
+                                >
+                                <div
+                                    className={`w-8 h-8 relative [perspective:100px] shrink-0 
+                                        edit-doors ${isEditModalOpen && selectedTodo?.id === todo.id ? 'open' : ''}`}
+                                >
+                                    <div className="absolute w-1/2 h-full top-0 bg-yellow-700 
+                                    border border-yellow-900 transition-transform duration-600 [transform-origin:left] 
+                                    hover:[transform:rotateY(-110deg)]" />
+                                    <div className="absolute w-1/2 h-full top-0 right-0 bg-yellow-700 
+                                    border border-yellow-900 transition-transform duration-600 [transform-origin:right] 
+                                    hover:[transform:rotateY(110deg)]" />
+                                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 
+                                    -translate-y-1/2 text-sm text-white drop-shadow-lg">
+                                        ✎
+                                    </span>
+                                </div>
+                                </label>
+                            </div>
+                        </div>
+                    ))}
+                    
+                </div>
+        
+            </GlassCard>
+
+            {/* Render Modals */}
+            <CreateTodoModal 
+                isOpen={isCreateModalOpen} 
+                onClose={() => setIsCreateModalOpen(false)} 
+            />
+            <EditTodoModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                todo={selectedTodo}
+            />
+        </>
     );
 };

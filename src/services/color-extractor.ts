@@ -1,5 +1,5 @@
 // src/services/color-extractor.ts
-const Vibrant = require('node-vibrant');
+import {Vibrant} from 'node-vibrant/node'
 
 /**
  * Extracts dominant colors from an image URL.

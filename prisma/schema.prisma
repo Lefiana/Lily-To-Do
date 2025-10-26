@@ -22,8 +22,11 @@ model User {
   todos     Todo[]
   gachas    Gacha[]
   currency  Currency?
+  notes     Notes[]
+  journals  Journal[]
   activeThemeItemId String?
   activeThemeItem Item? @relation("ActiveUserTheme", fields: [activeThemeItemId], references: [id])
+  timerPresets TimerPreset[] @relation("UserTimerPresets")
 }
 
 model Todo {
@@ -71,4 +74,42 @@ model Item {
   createdAt   DateTime @default(now())
   gachas      Gacha[]
   activeUsers User[]  @relation("ActiveUserTheme")
+  @@index([imageURL])
+}
+
+model TimerPreset {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("UserTimerPresets", fields: [userId], references: [id])
+  name      String   // e.g., "My Workout"
+  tasks     Json     // Store tasks as JSON array
+  totalTime Int      // Total session time in seconds
+  createdAt DateTime @default(now())
+
+  @@unique([userId, name]) // Prevent duplicate names per user
+}
+
+model Notes {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  title String
+  content String?
+  tags String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isFavorite Boolean @default(false)
+}
+
+model Journal {
+  id String @id @default(cuid())
+  userId String
+  date DateTime @default(now())
+  user User @relation(fields: [userId], references: [id])
+  title String
+  content String?
+  mood String? // e.g., "happy", "sad", "neutral"
+  tags String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

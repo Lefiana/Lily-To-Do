@@ -35,7 +35,7 @@ export function LoginForm() {
       <div className="relative w-[350px] sm:w-[400px] p-8 text-white rounded-2xl border border-white/20 backdrop-blur-2xl bg-white/10 shadow-xl">
         <div className="flex flex-col items-center mb-6">
           <img
-            src="https://res.cloudinary.com/dal65p2pp/image/upload/v1759830461/yae-miko_gcltn3.gif"
+            src="https://res.cloudinary.com/dal65p2pp/image/upload/v1760668146/835f2b4a3e2753c4dbd897c7ee903c27_t7azjc.webp"
             alt="Avatar"
             className="w-24 h-24 rounded-full border-4 border-white/70 mb-4"
           />

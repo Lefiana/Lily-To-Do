@@ -1,23 +1,25 @@
-// HomePageForm.tsx (place in src/components or appropriate location)
-
+// src/components/HomePageForm.tsx
 'use client';
 
 import Image from "next/image";
 
 export function HomePageForm() {
     return (
-        // The content is now the dark, glassy card
-        <div className="relative w-full max-w-2xl p-10 text-white 
-        rounded-2xl border border-white/20 backdrop-blur-2xl
-         bg-white/10 shadow-xl transition hover:shadow-2xl 
-         hover:border-white/30 z-10 mx-auto">
-            
-            <h1 className="text-3xl font-bold mb-4 text-center text-pink-400">Welcome to Lily 🌸</h1>
-            
+        <div
+            className="relative w-full max-w-2xl p-10 text-white 
+            rounded-2xl border border-white/20 backdrop-blur-2xl
+            bg-white/10 shadow-xl transition hover:shadow-2xl 
+            hover:border-white/30 z-10 mx-auto"
+        >
+            <h1 className="text-3xl font-bold mb-4 text-center text-pink-400">
+                Welcome to Lily 🌸
+            </h1>
+
             <p className="text-gray-300 text-center mb-8 max-w-lg mx-auto">
-                Lily is a modern web application built with Next.js, Tailwind CSS, and TypeScript. Experience the future of web development.
+                Lily is a modern web application built with Next.js, Tailwind CSS, and TypeScript.
+                Experience the future of productivity with an elegant and interactive interface.
             </p>
-            
+
             {/* Logo and Separator */}
             <div className="flex flex-col items-center">
                 <Image
@@ -26,7 +28,6 @@ export function HomePageForm() {
                     width={150}
                     height={150}
                     unoptimized
-                    // Use the custom border class from base.css
                     className="rounded-full border-4 border-custom-pink/50 mb-4 shadow-lg transition duration-300 hover:scale-[1.02]"
                 />
                 <div className="w-10 h-1 bg-pink-400/70 rounded-full mb-8"></div>
@@ -38,26 +39,46 @@ export function HomePageForm() {
                     Ready to begin your journey?
                 </p>
                 <div className="flex justify-center space-x-6">
-                    <a 
-                        href="/login" 
-                        // Use custom background and border classes from base.css
+                    <a
+                        href="/login"
                         className="text-white py-2 px-6 rounded-lg font-semibold transition duration-300 shadow-md bg-custom-purple border border-custom-pink"
                     >
                         Login
                     </a>
-                    <a 
-                        href="/register" 
+                    <a
+                        href="/register"
                         className="text-gray-900 py-2 px-6 rounded-lg font-semibold transition duration-300 bg-pink-400 hover:bg-pink-500 shadow-md"
                     >
                         Register
                     </a>
                 </div>
             </div>
-            
+
             {/* Footer */}
-            <div className="mt-12 text-center">
+            <div className="mt-12 text-center space-y-2">
                 <p className="text-gray-400 text-sm">
                     © {new Date().getFullYear()} Lily. All rights reserved.
+                </p>
+                <p className="text-gray-500 text-xs leading-relaxed max-w-md mx-auto">
+                    Images and artwork are owned by their respective creators.  
+                    Majority of the visual assets featured in Lily are sourced from{" "}
+                    <a
+                        href="https://waifu.im"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-pink-400 hover:underline"
+                    >
+                        waifu.im
+                    </a>{" "}
+                    and{" "}
+                    <a
+                        href="https://wallhaven.cc"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-pink-400 hover:underline"
+                    >
+                        wallhaven.cc
+                    </a>.
                 </p>
             </div>
         </div>

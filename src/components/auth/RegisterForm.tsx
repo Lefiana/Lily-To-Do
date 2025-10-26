@@ -37,13 +37,17 @@ export function RegisterForm() {
 return (
   <section className="relative flex items-center justify-center min-h-screen bg-gray-900 overflow-hidden">
     {/* Gradient blobs */}
-    <div className="absolute w-[280px] h-[280px] bg-gradient-to-r from-pink-500 to-purple-600 rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse" />
-    <div className="absolute w-[300px] h-[300px] bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full blur-3xl opacity-30 bottom-10 right-10 animate-pulse" />
+    <div className="absolute w-[280px] h-[280px] bg-gradient-to-r from-pink-500 to-purple-600 
+    rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse" />
+    <div className="absolute w-[300px] h-[300px] bg-gradient-to-r from-blue-500 to-cyan-400 
+    rounded-full blur-3xl opacity-30 bottom-10 right-10 animate-pulse" />
 
     {/* Glass container */}
-    <div className="relative w-[380px] sm:w-[420px] p-6 text-white rounded-2xl border border-white/20 backdrop-blur-2xl bg-white/10 shadow-xl">
+    <div className="relative w-[380px] sm:w-[420px] p-6 text-white rounded-2xl 
+    border border-white/20 backdrop-blur-2xl bg-white/10 shadow-xl">
       <div className="flex flex-col items-center mb-6">
-        <div className="w-24 h-24 rounded-full border-4 border-white/70 mb-4 flex items-center justify-center bg-black/30">
+        <div className="w-24 h-24 rounded-full border-4 border-white/70 mb-4 flex 
+        items-center justify-center bg-black/30">
           {/* Using a placeholder icon for a cleaner look */}
           <User size={48} className="text-white/70" />
         </div>

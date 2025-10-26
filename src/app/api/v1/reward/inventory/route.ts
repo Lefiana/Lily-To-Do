@@ -1,3 +1,4 @@
+// /api/v1/reward/inventory/route.ts
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserIdFromSession } from "@/lib/session";

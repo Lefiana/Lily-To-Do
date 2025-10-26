@@ -1,0 +1,53 @@
+// src/components/dashboard/GachaResultModal.tsx
+"use client";
+
+import React, { useRef, useEffect } from 'react';
+import { GlassCard } from './GlassCard';
+
+interface GachaResultModalProps {
+  result: any;
+  onClose: () => void;
+}
+
+export const GachaResultModal: React.FC<GachaResultModalProps> = ({ result, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Handle outside click to close
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
+
+  if (!result) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+      <GlassCard ref={modalRef} className="max-w-md w-full text-center">
+        <h3 className="text-lg font-bold text-white mb-4">🎉 You Got!</h3>
+        <img 
+          src={result.item?.imageURL} 
+          alt={result.item?.name} 
+          crossOrigin='anonymous'
+          className="h-40 w-40 mx-auto mb-4 rounded object-cover border border-pink-500/50" 
+        />
+        <p className="text-white font-semibold">{result.item?.name || 'Unknown Item'}</p>
+        <p className="text-gray-300 text-sm">Rarity: {result.item?.rarity || 'N/A'}</p>
+        <p className="text-gray-300 text-sm mb-4">New Balance: {result.newBalance} 🪙</p>
+        <button 
+          onClick={onClose}
+          className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-400 transition"
+        >
+          Close
+        </button>
+      </GlassCard>
+    </div>
+  );
+};

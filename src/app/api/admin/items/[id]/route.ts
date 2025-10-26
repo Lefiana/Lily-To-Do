@@ -1,3 +1,4 @@
+// api/admin/items/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getRequiredAuth } from "@/lib/auth-helper";
 import { prisma } from "@/lib/prisma";
@@ -7,7 +8,7 @@ const ADMIN_ROLE = 'ADMIN';
 
 // Define the structure for dynamic route parameters
 interface Context {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }
 
 /**
@@ -31,7 +32,8 @@ async function findItemOrThrow(id: string) {
  * GET /api/admin/items/[id]
  * Fetch a single item by ID (Admin access only).
  */
-export async function GET(req: NextRequest, { params }: Context) {
+export async function GET(req: NextRequest, props: Context) {
+    const params = await props.params;
     try {
         await getRequiredAuth(ADMIN_ROLE);
         const item = await findItemOrThrow(params.id);
@@ -54,7 +56,8 @@ export async function GET(req: NextRequest, { params }: Context) {
  * Update a single item by ID (Admin access only).
  * Handles partial updates (e.g., changing only the rarity).
  */
-export async function PATCH(req: NextRequest, { params }: Context) {
+export async function PATCH(req: NextRequest, props: Context) {
+    const params = await props.params;
     try {
         await getRequiredAuth(ADMIN_ROLE);
         const { id } = params;
@@ -130,27 +133,51 @@ export async function PATCH(req: NextRequest, { params }: Context) {
  * DELETE /api/admin/items/[id]
  * Delete a single item by ID (Admin access only).
  */
-export async function DELETE(req: NextRequest, { params }: Context) {
-    try {
-        await getRequiredAuth(ADMIN_ROLE);
+// export async function DELETE(req: NextRequest, props: Context) {
+//     const params = await props.params;
+//     try {
+//         await getRequiredAuth(ADMIN_ROLE);
         
-        // Ensure the item exists before attempting to delete
-        await findItemOrThrow(params.id);
+//         // Ensure the item exists before attempting to delete
+//         await findItemOrThrow(params.id);
+//         console.log("Deleting item with ID:", params.id);
+//         // Delete the item
+//         await prisma.item.delete({
+//             where: { id: params.id },
+//         });
+//         console.log("Item deleted successfully:", params.id);
+//         // 204 No Content is standard for successful deletions
+//         return new NextResponse(null, { status: 204 });
 
-        // Delete the item
-        await prisma.item.delete({
-            where: { id: params.id },
-        });
+//     } catch (error) {
+//         if (error instanceof NextResponse) {
+//             return error;
+//         }
+//         console.error("Error deleting item:", error);
+//         // Catch if the item was already deleted (P2025 error code is common here)
+//         return NextResponse.json({ error: "Failed to delete item" }, { status: 500 });
+//     }
+// }
 
-        // 204 No Content is standard for successful deletions
-        return new NextResponse(null, { status: 204 });
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const params = await context.params;
 
-    } catch (error) {
-        if (error instanceof NextResponse) {
-            return error;
-        }
-        console.error("Error deleting item:", error);
-        // Catch if the item was already deleted (P2025 error code is common here)
-        return NextResponse.json({ error: "Failed to delete item" }, { status: 500 });
+  const todoId = params.id;
+
+  try {
+    await getRequiredAuth(ADMIN_ROLE);
+    // Delete the todo
+    await findItemOrThrow(params.id);
+    await prisma.todo.delete({
+      where: { id: todoId, }, // Ensure the todo belongs to the user
+    });
+    return NextResponse.json({ message: "Todo deleted successfully" }, { status: 200 });
+  } catch (error:any) {
+    console.error("Error deleting todo:", error);
+    // Handle case where todoId + userId combination is not found
+    if (error.code === 'P2025') { 
+        return NextResponse.json({ error: "Todo not found or unauthorized" }, { status: 404 });
     }
+    return NextResponse.json({ error: "Failed to delete todo" }, { status: 500 });
+  }
 }
