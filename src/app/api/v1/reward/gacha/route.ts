@@ -79,13 +79,19 @@ export async function POST(req: NextRequest) {
             newBalance: result.newBalance
         }, { status: 200 });
 
-    } catch (error: any) {
-        console.error("Error performing gacha:", error);
+        } catch (error: unknown) {
+            console.error("Error performing gacha:", error);
 
-        if (error.message === "Insufficient Coins") {
-             return NextResponse.json({ error: "Insufficient currency to perform gacha pull." }, { status: 402 });
+            if (error instanceof Error && error.message === "Insufficient Coins") {
+                return NextResponse.json(
+                    { error: "Insufficient currency to perform gacha pull." },
+                    { status: 402 }
+                );
+            }
+
+            return NextResponse.json(
+                { error: "Failed to perform gacha pull" },
+                { status: 500 }
+            );
         }
-        
-        return NextResponse.json({ error: "Failed to perform gacha pull" }, { status: 500 });
-    }
 }

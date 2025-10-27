@@ -127,38 +127,6 @@ export async function PATCH(req: NextRequest, props: Context) {
     }
 }
 
-// ------------------------------------------------------------------------------------------------
-
-/**
- * DELETE /api/admin/items/[id]
- * Delete a single item by ID (Admin access only).
- */
-// export async function DELETE(req: NextRequest, props: Context) {
-//     const params = await props.params;
-//     try {
-//         await getRequiredAuth(ADMIN_ROLE);
-        
-//         // Ensure the item exists before attempting to delete
-//         await findItemOrThrow(params.id);
-//         console.log("Deleting item with ID:", params.id);
-//         // Delete the item
-//         await prisma.item.delete({
-//             where: { id: params.id },
-//         });
-//         console.log("Item deleted successfully:", params.id);
-//         // 204 No Content is standard for successful deletions
-//         return new NextResponse(null, { status: 204 });
-
-//     } catch (error) {
-//         if (error instanceof NextResponse) {
-//             return error;
-//         }
-//         console.error("Error deleting item:", error);
-//         // Catch if the item was already deleted (P2025 error code is common here)
-//         return NextResponse.json({ error: "Failed to delete item" }, { status: 500 });
-//     }
-// }
-
 export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
 
@@ -172,12 +140,9 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
       where: { id: todoId, }, // Ensure the todo belongs to the user
     });
     return NextResponse.json({ message: "Todo deleted successfully" }, { status: 200 });
-  } catch (error:any) {
+  } catch (error) {
     console.error("Error deleting todo:", error);
     // Handle case where todoId + userId combination is not found
-    if (error.code === 'P2025') { 
-        return NextResponse.json({ error: "Todo not found or unauthorized" }, { status: 404 });
-    }
-    return NextResponse.json({ error: "Failed to delete todo" }, { status: 500 });
+    return NextResponse.json({ error: "Todo not found or unauthorized" }, { status: 404 });
   }
 }

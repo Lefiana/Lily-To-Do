@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
         // --- 3. Fetch from Waifu.im API with Timeout ---
         const body = await req.json().catch(() => ({}));
-        let { character } = body;
+        const { character } = body;
 
         let tag = 'waifu';
         if (character) {
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         }
 
         const fullTags = `${tag},selfie`; // e.g., "raiden-shogun,selfie" or "waifu,selfie"
-        let url = `https://api.waifu.im/search?included_tags=${encodeURIComponent(fullTags)}&limit=2`;
+        const url = `https://api.waifu.im/search?included_tags=${encodeURIComponent(fullTags)}&limit=2`;
         console.log(`Using tags: ${fullTags}`); // Debug log
 
         // 🎯 Add timeout using AbortController (built-in, no extra lib needed)
