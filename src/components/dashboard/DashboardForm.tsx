@@ -6,9 +6,6 @@ import { GachaAreaCard } from "@/components/dashboard/GachaAreaCard";
 
 export const DashboardContent = () => {
     
-    const userName = "GUEST_USER"; 
-    const currencyAmount = 9999; 
-
 return (
         <div className="w-full max-w-screen-xl px-4 py-10 mx-auto"> 
             <h1 className="text-5xl font-extrabold text-white mb-8 drop-shadow-lg text-center">
