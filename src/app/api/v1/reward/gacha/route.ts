@@ -9,7 +9,7 @@ import { Role } from "@prisma/client";
 // Define the cost for this specific gacha
 const GACHA_COST = REWARD_CONFIG.GACHA_COST || 2000;
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
     const userId = await getUserIdFromSession();
     if (!userId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

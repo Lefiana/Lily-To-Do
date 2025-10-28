@@ -14,7 +14,7 @@ interface TaskListProps {
   tasks: Task[];
   completedTasks: Set<string>;
   addTask: () => void;
-  updateTask: (id: string, field: keyof Task, value: any) => void;
+  updateTask: (id: string, field: keyof Task, value: Task[keyof Task]) => void; 
   removeTask: (id: string) => void;
   reorderTasks: (newOrder: Task[]) => void;
   activeTaskId?: string;
@@ -108,7 +108,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                         {/* Inputs Row */}
                         <div className="grid grid-cols-3 gap-3 text-sm">
                           <div className="flex flex-col">
-                            <label htmlFor={`duration-${task.id}`}className="text-gray-400 text-xs mb-1">⏱ Duration (s)</label>
+                            <label htmlFor={`duration-${task.id}`} className="text-gray-400 text-xs mb-1">⏱ Duration (s)</label>
                             <input
                               id={`duration-${task.id}`}
                               type="number"
@@ -120,9 +120,9 @@ export const TaskList: React.FC<TaskListProps> = ({
                           </div>
 
                           <div className="flex flex-col">
-                            <label htmlFor={`sound-${task.id}`}className="text-gray-400 text-xs mb-1">🔔 Sound</label>
+                            <label htmlFor={`sound-${task.id}`} className="text-gray-400 text-xs mb-1">🔔 Sound</label>
                             <select
-                              id = {`sound-${task.id}`}
+                              id={`sound-${task.id}`}
                               value={task.sound || ''}
                               onChange={(e) => updateTask(task.id, 'sound', e.target.value)}
                               className="p-1.5 bg-gray-900 text-white rounded-md border border-gray-600 focus:border-blue-500"
@@ -138,18 +138,16 @@ export const TaskList: React.FC<TaskListProps> = ({
                           </div>
 
                           <div className="flex flex-col">
-                            <label htmlFor={ `rest-${task.id}`} 
-                            className="text-gray-400 text-xs mb-1">💤 Rest After (s)</label>
+                            <label htmlFor={`rest-${task.id}`} className="text-gray-400 text-xs mb-1">💤 Rest After (s)</label>
                             <input
                               id={`rest-${task.id}`}
                               type="number"
-                              placeholder='e.g., 30'
+                              placeholder="e.g., 30"
                               value={task.rest_after || ''}
                               onChange={(e) =>
-                                updateTask(task.id, 'rest_after', parseInt(e.target.value) || undefined)
+                                updateTask(task.id, 'rest_after', parseInt(e.target.value) || 0) // Fixed: Complete the fallback to 0
                               }
-                              className="p-1.5 bg-gray-900 text-white 
-                              rounded-md border border-gray-600 focus:border-blue-500"
+                              className="p-1.5 bg-gray-900 text-white rounded-md border border-gray-600 focus:border-blue-500"
                               disabled={isCompleted}
                             />
                           </div>

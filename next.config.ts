@@ -12,6 +12,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/dal65p2pp/image/upload/**', // Recommended: specify the Cloudinary path structure if possible
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.waifu.im', // For waifu.im API images (based on your sample)
+        port: '',
+        pathname: '/**', // Allow all paths under cdn.waifu.im
+      },
+      {
+        protocol: 'https',
+        hostname: 'w.wallhaven.cc', // For wallhaven.cc API images (based on your sample)
+        port: '',
+        pathname: '/**', // Allow all paths under w.wallhaven.cc
+      },
     ],
   },
 };

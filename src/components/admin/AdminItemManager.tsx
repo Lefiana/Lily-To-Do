@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import useSWR from 'swr';
+import Image from 'next/image';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -128,26 +129,35 @@ export const AdminItemManager: React.FC = () => {
         )}
       </form>
 
-      {/* Items List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"> {/* 🎯 Grid layout */}
+            {/* Items List */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"> {/* 🎯 Grid layout */}
         {filteredItems?.map((item) => (
-            <div key={item.id} className="p-4 border rounded shadow-sm bg-white"> {/* 🎯 Changed from <li> to <div> */}
+          <div key={item.id} className="p-4 border rounded shadow-sm bg-white"> {/* 🎯 Changed from <li> to <div> */}
             <div>
-                <p><strong>{item.name}</strong> (Rarity: {item.rarity})</p>
-                {item.description && <p className="text-sm text-gray-600">{item.description}</p>}
-                {item.imageURL && <img src={item.imageURL} alt={item.name} className="w-full h-32 object-cover mt-2 rounded" />}
+              <p><strong>{item.name}</strong> (Rarity: {item.rarity})</p>
+              {item.description && <p className="text-sm text-gray-600">{item.description}</p>}
+              {item.imageURL && (
+                <div className="relative w-full h-32 mt-2 rounded overflow-hidden">
+                  <Image
+                    src={item.imageURL}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
             </div>
             <div className="mt-2 flex justify-end space-x-2">
-                <button onClick={() => handleEdit(item)} className="bg-yellow-500 text-white px-3 py-1 rounded text-sm">
+              <button onClick={() => handleEdit(item)} className="bg-yellow-500 text-white px-3 py-1 rounded text-sm">
                 Edit
-                </button>
-                <button onClick={() => handleDelete(item.id)} className="bg-red-500 text-white px-3 py-1 rounded text-sm">
+              </button>
+              <button onClick={() => handleDelete(item.id)} className="bg-red-500 text-white px-3 py-1 rounded text-sm">
                 Delete
-                </button>
+              </button>
             </div>
-            </div>
+          </div>
         ))}
-        </div>
+      </div>
     </div>
   );
 };

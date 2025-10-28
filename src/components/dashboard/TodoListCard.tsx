@@ -8,7 +8,7 @@ import { CreateTodoModal } from './CreateTodoModal';
 import { EditTodoModal } from './EditTodoModal';
 export const ToDoListCard: React.FC = () => {
     // 🎯 Call the hook to access data and mutations hooks and modal
-    const { todos, isLoading, error, createTodo, markCompleted, deleteTodo } = useTodos(); 
+    const { todos, isLoading, error, markCompleted} = useTodos(); 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);

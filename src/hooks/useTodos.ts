@@ -80,10 +80,11 @@ export const useTodos = () => {
       if (!res.ok) throw new Error(result.error || "Failed to create todo.");
 
       mutate(API_URL);
-    } catch (err: any) {
+    } catch (err: unknown) {
       mutate(API_URL);
       console.error("Failed to create todo:", err);
-      toast.error(err.message || "You already have 3 active daily quests today.");
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+      toast.error(errorMessage || "You already have 3 active daily quests today.");
     }
   };
 

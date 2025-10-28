@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let currencyDeducted = false; // 🎯 Flag to track if we need to rollback
+    let currencyDeducted = false; 
 
     try {
         // --- 1. Fetch Current Currency and Check Balance ---
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
             where: { userId },
             data: { amount: { decrement: PUBLIC_GACHA_COST } },
         });
-        currencyDeducted = true; // 🎯 Mark as deducted
+        currencyDeducted = true; 
 // app/api/v1/reward/public-gacha/route.ts
 // ... (rest of the file unchanged)
 
@@ -61,8 +61,6 @@ export async function POST(req: NextRequest) {
         });
 
         clearTimeout(timeoutId); // Clear timeout if successful
-
-        // 🎯 Handle 400 error with fallback
         if (waifuRes.status === 400) {
             console.log(`400 error for "${fullTags}", falling back to "${tag}"`);
             // Fallback: Try without selfie
@@ -117,7 +115,7 @@ export async function POST(req: NextRequest) {
         };
         console.log(`Generated name: ${itemData.name}`);
 
-        let existingItem = await prisma.item.findFirst({
+        const existingItem = await prisma.item.findFirst({
             where: { imageURL: image.url },
         });
 
@@ -153,10 +151,9 @@ export async function POST(req: NextRequest) {
             newBalance
         }, { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error performing public gacha:", error);
 
-        // 🎯 Rollback currency if deducted but fetch failed
         if (currencyDeducted) {
             try {
                 await prisma.currency.update({
@@ -169,8 +166,7 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // 🎯 Handle specific errors
-        if (error.name === 'AbortError') {
+        if (error instanceof Error && error.name === 'AbortError') {
             return NextResponse.json({ error: "Request timed out. Please try again." }, { status: 408 });
         }
 

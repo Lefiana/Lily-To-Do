@@ -20,7 +20,7 @@ export async function getRequiredAuth(requiredRole: string): Promise<{ session: 
 
     // 3. Check Authorization (Role)
     // We assume 'session.user.role' is populated by your callbacks in @/lib/auth.ts
-    const userRole = (session.user as any).role; 
+    const userRole = session.user.role;
     
     // NOTE: Using 'as any' is a temporary cast to access the custom 'role' property.
     // If your project has correctly set up next-auth.d.ts, this cast won't be needed.

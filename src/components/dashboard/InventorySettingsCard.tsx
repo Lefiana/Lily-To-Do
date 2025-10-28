@@ -17,7 +17,7 @@ export const InventorySettingsCard: React.FC = () => {
   const [showTimer, setShowTimer] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [showJournal, setShowJournal] = useState(false);
-  const { data: inventory, error, mutate } = useSWR(showInventory ? '/api/v1/reward/inventory' : null, fetcher);
+  const { data: inventory, error} = useSWR(showInventory ? '/api/v1/reward/inventory' : null, fetcher);
 
   const handleViewInventory = () => {
     setShowInventory(true);

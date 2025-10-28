@@ -62,7 +62,7 @@ export const TimerModal: React.FC<TimerModalProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <GlassCard className="w-full max-w-md h-3/4 overflow-hidden flex flex-col">
+      <GlassCard className="w-full max-w-xl h-3/4 overflow-hidden flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-white">Timer</h2>
           <button onClick={onClose} className="text-white hover:text-pink-400 text-2xl">×</button>

@@ -1,5 +1,5 @@
-// src/components/dashboard/TimerControls.tsx
 import React from 'react';
+import { Todo } from '@/types/timer'; // Add this import (adjust path if needed)
 
 interface TimerControlsProps {
   totalTime: number;
@@ -8,7 +8,7 @@ interface TimerControlsProps {
   isPaused: boolean;
   startTimer: () => void;
   pauseTimer: () => void;
-  todos: any[];
+  todos: Todo[]; 
   linkedTodoId: string | null;
   setLinkedTodoId: (id: string | null) => void;
 }
@@ -31,8 +31,12 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
   };
 
   const parseTime = (value: string) => {
-    const [mins, secs] = value.split(':').map(Number);
-    return (mins || 0) * 60 + (secs || 0);
+    const parts = value.split(':').map(Number);
+    if (parts.length === 2) {
+      const [mins, secs] = parts;
+      return (mins || 0) * 60 + (secs || 0);
+    }
+    return 0; // Default to 0 if invalid format
   };
 
   return (
@@ -58,7 +62,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
           className="w-full p-2 mt-1 bg-gray-700 text-white rounded"
         >
           <option value="">None</option>
-          {todos?.map((todo: any) => (
+          {todos?.map((todo: Todo) => ( // Fixed: Explicitly type 'todo' as Todo
             <option key={todo.id} value={todo.id}>{todo.title}</option>
           ))}
         </select>

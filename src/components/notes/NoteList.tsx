@@ -1,4 +1,3 @@
-// src/components/notes/NoteList.tsx
 "use client";
 
 import React from 'react';
@@ -9,8 +8,8 @@ interface Note extends NoteData {
 }
 
 interface NoteListProps {
-  notes: Note[] | undefined ;
-  error: any;
+  notes: Note[] | null; // Fixed: Complete the type (assuming null if not loaded)
+  error: string | null; 
   onEdit: (note: Note) => void;
   onDelete: (note: Note) => void;
   onToggleFavorite: (note: Note) => void;
@@ -54,14 +53,14 @@ export const NoteList: React.FC<NoteListProps> = ({
           {/* Note Content */}
           <div className="pr-12"> 
             <h4 className="font-semibold text-white text-lg mb-1 truncate">{note.title}</h4>
-            <p className="text-sm text-gray-200 line-clamp-4">{note.content}</p> {/* Changed to text-gray-200 for better visibility */}
+            <p className="text-sm text-gray-200 line-clamp-4">{note.content}</p>
             {note.tags && note.tags.length > 0 && (
-              <p className="text-xs text-indigo-200 mt-2"> {/* Changed to text-indigo-200 for better visibility */}
+              <p className="text-xs text-indigo-200 mt-2">
                 <span className="opacity-70">Tags:</span> {note.tags.join(', ')}
               </p>
             )}
             {note.createdAt && (
-              <p className="text-xs text-gray-300 mt-1"> {/* Changed to text-gray-300 for better visibility */}
+              <p className="text-xs text-gray-300 mt-1">
                 Created: {new Date(note.createdAt).toLocaleDateString()}
               </p>
             )}

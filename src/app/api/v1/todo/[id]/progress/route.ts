@@ -24,11 +24,11 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
         });
 
         return NextResponse.json(updatedTodo,{status: 200});
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error updating todo progress:", error);
         
         // Handle the case where the record was not found (P2025)
-        if (error.code === 'P2025') {
+        if (error instanceof Error && 'code' in error && error.code === 'P2025') {
             return NextResponse.json({ error: "Todo not found or unauthorized" }, { status: 404 });
         }
         

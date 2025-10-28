@@ -1,24 +1,25 @@
-// src/components/dashboard/PresetSelector.tsx
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { Task, TimerPreset } from '@/types/timer'; // Add this import (adjust path if needed)
 
 interface PresetSelectorProps {
-  onPresetChange: (preset: 'workout' | 'study' | { name: string; tasks: any[]; totalTime: number }) => void;
-  currentTasks: any[];
+  onPresetChange: (preset: 'workout' | 'study' | TimerPreset) => void; 
+  currentTasks: Task[]; 
   currentTotalTime: number;
-  setTasks: (tasks: any[]) => void; 
-  setTotalTime: (time: number) => void; 
+  setTasks?: (tasks: Task[]) => void; // Add back as optional
+  setTotalTime?: (time: number) => void; // Add back as optional
 }
 
 export const PresetSelector: React.FC<PresetSelectorProps> = ({
   onPresetChange,
   currentTasks,
   currentTotalTime,
-  setTasks, 
-  setTotalTime, 
+  setTasks,
+  setTotalTime,
+  // Removed setTasks and setTotalTime
 }) => {
   const { data: session } = useSession();
-  const [customPresets, setCustomPresets] = useState<any[]>([]);
+  const [customPresets, setCustomPresets] = useState<TimerPreset[]>([]); 
   const [showSave, setShowSave] = useState(false);
   const [presetName, setPresetName] = useState('');
 

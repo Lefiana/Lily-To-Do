@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
+import Image from "next/image";
 import { signIn } from "next-auth/react";
 
 export function LoginForm() {
@@ -34,11 +35,13 @@ export function LoginForm() {
       {/* Glassmorphism Container */}
       <div className="relative w-[350px] sm:w-[400px] p-8 text-white rounded-2xl border border-white/20 backdrop-blur-2xl bg-white/10 shadow-xl">
         <div className="flex flex-col items-center mb-6">
-          <img
-            src="https://res.cloudinary.com/dal65p2pp/image/upload/v1760668146/835f2b4a3e2753c4dbd897c7ee903c27_t7azjc.webp"
-            alt="Avatar"
-            className="w-24 h-24 rounded-full border-4 border-white/70 mb-4"
-          />
+            <Image
+              src="https://res.cloudinary.com/dal65p2pp/image/upload/v1760668146/835f2b4a3e2753c4dbd897c7ee903c27_t7azjc.webp"
+              alt="Avatar"
+              width={96}  // Matches w-24 (24 * 4px = 96px in Tailwind)
+              height={96} // Matches h-24
+              className="rounded-full border-4 border-white/70 mb-4"
+            />
           <h2 className="text-2xl font-semibold">Welcome Back</h2>
           <p className="text-gray-300 text-sm">Please log in to continue</p>
         </div>

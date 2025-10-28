@@ -2,12 +2,8 @@
 import React from 'react';
 import { HTMLAttributes, forwardRef } from 'react'; // 🎯 Add forwardRef
 
-// ✅ Updated: Use forwardRef to support refs
-export interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
-  // The 'className' and other props are already included via HTMLAttributes.
-}
-
-export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
+// ✅ Removed: Empty GlassCardProps interface (no longer needed)
+export const GlassCard = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ children, className, ...props }, ref) => { // 🎯 Add ref parameter
     return (
       <div

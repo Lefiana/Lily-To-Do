@@ -5,11 +5,13 @@ import { GlassCard } from '@/components/dashboard/GlassCard';
 import { useCurrency } from '@/hooks/useCurrency';
 import { GachaResultModal } from './GachaResultModal'; // Import the modal
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { GachaResult } from '@/types/gacha';
 
 export const GachaAreaCard: React.FC = () => {
   const { performGacha, currency } = useCurrency();
   const [isPulling, setIsPulling] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<GachaResult | null>(null);
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === 'ADMIN'; // Check if user is admin
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +56,9 @@ export const GachaAreaCard: React.FC = () => {
       const gachaResult = await performGacha(mode, character);
       setResult(gachaResult);
       setShowModal(true); 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      setError(errorMessage);
     } finally {
       setIsPulling(false);
     }
@@ -85,13 +88,15 @@ export const GachaAreaCard: React.FC = () => {
           {gachaTitle}
         </h2>
         
-        <div className="h-32 w-32 bg-white/10 rounded-full flex items-center justify-center mb-4 border border-pink-500/50">
-          <img
-            src={gachaImage}
-            alt={`${mode} Gacha Machine`}
-            crossOrigin='anonymous'
-            className="h-32 w-32 rounded-full object-cover"
-          />
+       <div className="h-32 w-32 bg-white/10 rounded-full flex items-center justify-center mb-4 border border-pink-500/50">
+          <div className="relative w-full h-full rounded-full overflow-hidden">
+            <Image
+              src={gachaImage}
+              alt={`${mode} Gacha Machine`}
+              fill
+              className="object-cover"
+            />
+          </div>
         </div>
 
         {/* Conditionally render the manual gacha button/input */}

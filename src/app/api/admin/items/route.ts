@@ -11,7 +11,7 @@ const ADMIN_ROLE = 'ADMIN';
  * GET /api/admin/items
  * Fetch all items (Admin access only).
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
     try {
         // Enforce Admin role check. If it fails, it throws a NextResponse (401/403)
         await getRequiredAuth(ADMIN_ROLE);

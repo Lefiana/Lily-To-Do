@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
  * GET /api/v1/todo
  * Fetch all todos for the authenticated user.
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const userId = await getUserIdFromSession();
 
   if (!userId) {

@@ -70,9 +70,9 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
             currency: updatedCurrency.amount
         }, { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error updating todo completed status or awarding currency:", error);
-        if (error.code === 'P2025') {
+        if (error instanceof Error && 'code' in error && error.code === 'P2025') {
             return NextResponse.json({ error: "Todo not found or unauthorized" }, { status: 404 });
         }
         return NextResponse.json({ error: "Error Updating todo completed status" }, { status: 500 });

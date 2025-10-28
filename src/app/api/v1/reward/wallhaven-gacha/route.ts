@@ -6,17 +6,37 @@ import { REWARD_CONFIG } from "@/lib/constants";
 
 const WALLHAVEN_COST = REWARD_CONFIG.WALLHAVEN_GACHA_COST || 1000; // Set cost
 const CACHE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes inactivity expiry
+const MAX_CACHE_SIZE = 24; // Matches API fetch limit to prevent bloat
+const MIN_CACHE_THRESHOLD = 5; // Refresh if below this after selections
+
+// Define types for Wallhaven API response
+interface WallhavenTag {
+  name: string;
+  // Add other properties if needed (e.g., id, category)
+}
+
+interface WallhavenImage {
+  id: string;
+  path: string;
+  source?: string;
+  tags?: WallhavenTag[];
+  // Add other properties if needed (e.g., resolution, colors)
+}
 
 // Global cache for Wallhaven images (in-memory; resets on server restart)
-let wallhavenCache: {
-  images: any[]; // Array of image objects from API
+const wallhavenCache: {
+  images: WallhavenImage[];
   lastFetched: number; // Timestamp of last fetch
 } = {
   images: [],
   lastFetched: 0,
 };
 
-export async function POST(req: NextRequest) {
+// Simple counters for portfolio monitoring (resets on cold start)
+let apiCallCount = 0;
+let cacheHitCount = 0;
+
+export async function POST(_req: NextRequest) {  // Prefixed 'req' with '_' to indicate unused
   console.log('Wallhaven API called'); // 🎯 Debug
   const userId = await getUserIdFromSession();
   if (!userId) {
@@ -35,11 +55,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Insufficient currency" }, { status: 402 });
     }
 
-    // Check if cache is valid (not empty and not expired)
+    // Check if cache needs refresh (invalid OR low on images)
     const now = Date.now();
     const isCacheValid = wallhavenCache.images.length > 0 && (now - wallhavenCache.lastFetched) < CACHE_EXPIRY_MS;
+    const needsRefresh = !isCacheValid || wallhavenCache.images.length < MIN_CACHE_THRESHOLD;
 
-    if (!isCacheValid) {
+    if (needsRefresh) {
+      apiCallCount++;
+      console.log(`API call #${apiCallCount} - Fetching new images`); // Portfolio: Track API usage
       // Fetch from Wallhaven (random sorting, page 1 for 24 results)
       const apiKey = process.env.WALLHAVEN_API_KEY; // Optional: Add to .env
       const url = `https://wallhaven.cc/api/v1/search?sorting=random${apiKey ? `&apikey=${apiKey}` : ''}`;
@@ -50,22 +73,24 @@ export async function POST(req: NextRequest) {
 
       const data = await response.json();
       console.log('Data received:', data); // 🎯 Debug
-      const images = data.data; // Array of 24 images
+      const images = data.data as WallhavenImage[];  // Type assertion for safety
       if (!images || images.length === 0) {
         throw new Error("No images from Wallhaven");
       }
 
-      // Update cache
-      wallhavenCache.images = [...images]; // Copy to avoid mutations
+      // Update cache (limit to MAX_CACHE_SIZE)
+      wallhavenCache.images = images.slice(0, MAX_CACHE_SIZE);
       wallhavenCache.lastFetched = now;
-      console.log('Cache updated with', images.length, 'images'); // 🎯 Debug
+      console.log(`Cache refreshed with ${wallhavenCache.images.length} images`); // Portfolio: Monitor refreshes
+    } else {
+      cacheHitCount++;
+      console.log(`Cache hit #${cacheHitCount} - Using cached images`); // Portfolio: Track cache efficiency
     }
 
     // Randomly select and remove from cache (to avoid duplicates)
     const randomIndex = Math.floor(Math.random() * wallhavenCache.images.length);
     const randomImage = wallhavenCache.images.splice(randomIndex, 1)[0]; // Remove and get the image
-    console.log('Selected image:', randomImage); // 🎯 Debug
-    console.log('Remaining in cache:', wallhavenCache.images.length); // 🎯 Debug
+    console.log(`Selected image ID: ${randomImage.id}, remaining in cache: ${wallhavenCache.images.length}`); // Portfolio: Track selections
 
     // Deduct currency
     await prisma.currency.update({
@@ -81,11 +106,11 @@ export async function POST(req: NextRequest) {
       rarity: 1,
       imageURL: proxiedImageUrl, // Full image URL
       description: `Wallpaper from Wallhaven.cc. Source: ${randomImage.source || wallhavenUrl}. 
-      Tags: ${randomImage.tags?.map((t: any) => t.name).join(', ')}.`, // Use Wallhaven URL if no source
+      Tags: ${randomImage.tags?.map((t: WallhavenTag) => t.name).join(', ')}.`,  // Proper typing for tags
     };
 
     // Save to DB
-    let existingItem = await prisma.item.findFirst({
+    const existingItem = await prisma.item.findFirst({  // Changed from 'let' to 'const'
       where: { imageURL: randomImage.path },
     });
     let savedItem;
@@ -110,7 +135,7 @@ export async function POST(req: NextRequest) {
     const newBalance = currentAmount - WALLHAVEN_COST;
     return NextResponse.json({ message: "Wallhaven gacha successful!", item, newBalance }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {  // Changed from 'any' to 'unknown'
     console.error("Error in Wallhaven gacha:", error); // 🎯 Debug
     // Rollback on error
     if (userId) {

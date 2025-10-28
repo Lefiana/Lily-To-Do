@@ -3,9 +3,11 @@
 
 import React, { useRef, useEffect } from 'react';
 import { GlassCard } from './GlassCard';
+import Image from 'next/image';
+import { GachaResult } from '@/types/gacha';
 
 interface GachaResultModalProps {
-  result: any;
+  result: GachaResult | null;
   onClose: () => void;
 }
 
@@ -32,12 +34,16 @@ export const GachaResultModal: React.FC<GachaResultModalProps> = ({ result, onCl
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
       <GlassCard ref={modalRef} className="max-w-md w-full text-center">
         <h3 className="text-lg font-bold text-white mb-4">🎉 You Got!</h3>
-        <img 
-          src={result.item?.imageURL} 
-          alt={result.item?.name} 
-          crossOrigin='anonymous'
-          className="h-40 w-40 mx-auto mb-4 rounded object-cover border border-pink-500/50" 
-        />
+        {result.item?.imageURL && (
+          <div className="relative h-40 w-40 mx-auto mb-4 rounded overflow-hidden border border-pink-500/50">
+            <Image
+              src={result.item.imageURL}
+              alt={result.item.name || 'Item'}
+              fill
+              className="object-cover"
+            />
+          </div>
+        )}
         <p className="text-white font-semibold">{result.item?.name || 'Unknown Item'}</p>
         <p className="text-gray-300 text-sm">Rarity: {result.item?.rarity || 'N/A'}</p>
         <p className="text-gray-300 text-sm mb-4">New Balance: {result.newBalance} 🪙</p>

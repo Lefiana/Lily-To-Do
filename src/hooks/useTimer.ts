@@ -1,6 +1,6 @@
-// src/components/dashboard/useTimer.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // Add useCallback
 import toast from 'react-hot-toast';
+
 interface Task {
   id: string;
   name: string;
@@ -23,7 +23,7 @@ const presets = {
   ],
 };
 
-export const useTimer = (onSessionComplete?: () => void) => { // 🎯 Add callback for session completion
+export const useTimer = (onSessionComplete?: () => void) => {
   const [totalTime, setTotalTime] = useState(1200);
   const [tasks, setTasks] = useState<Task[]>(presets.workout);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
@@ -37,40 +37,53 @@ export const useTimer = (onSessionComplete?: () => void) => { // 🎯 Add callba
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   const activeTaskId = tasks[currentTaskIndex]?.id;
 
-    const playSound = (sound: string) => {
-    // 🎯 Fallback to browser beep if sound file missing
-    if (typeof window !== 'undefined') {
-        const audio = new Audio(`/sounds/${sound}.mp3`);
-        audio.play().catch(() => {
+  const playSound = (sound: string) => {
+    // Fallback to browser beep if sound file missing
+    if (typeof window !== 'undefined') { // Fixed: Check for 'undefined' instead of ''
+      const audio = new Audio(`/sounds/${sound}.mp3`);
+      audio.play().catch(() => {
         // Fallback: Simple beep using Web Audio API
-        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const context = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)(); // Fixed: Use proper type assertion instead of 'any'
         const oscillator = context.createOscillator();
         oscillator.frequency.setValueAtTime(800, context.currentTime);
         oscillator.connect(context.destination);
         oscillator.start();
         oscillator.stop(context.currentTime + 0.2);
-        });
+      });
     }
-    };
+  };
 
-    useEffect(() => {
-        if (isRunning && !isPaused) {
-        const interval = setInterval(() => {
-            setSessionTimeElapsed(prev => prev + 1);
-            if (sessionTimeElapsed >= totalTime && !sessionCompleted) {
-            setIsRunning(false);
-            setSessionCompleted(true); // 🎯 Prevent further calls
-            toast.success('Session complete!'); // 🎯 Toast instead of alert
-            onSessionComplete?.();
-            return;
-            }
+  const nextTask = useCallback(() => { // Stabilize with useCallback
+    if (currentTaskIndex < tasks.length - 1) {
+      setCurrentTaskIndex(currentTaskIndex + 1);
+      setTimeLeft(tasks[currentTaskIndex + 1].duration);
+    } else {
+      setIsRunning(false);
+      setSessionCompleted(true);
+      toast.success('Session complete!');
+      playSound('session_complete');
+      onSessionComplete?.();
+    }
+  }, [currentTaskIndex, tasks, onSessionComplete]);
 
-            const currentTask = tasks[currentTaskIndex];
-            if (currentTask){
-              const taskDuration = isResting ? currentTask.rest_after || 0 : currentTask.duration;
-              const progress = taskDuration ? ((taskDuration - timeLeft) / taskDuration) * 100 : 0;
-              setProgressMap(prev => ({ ...prev, [currentTask.id]: Math.min(progress, 100)}));
-            }
+  useEffect(() => {
+    if (isRunning && !isPaused) {
+      const interval = setInterval(() => {
+        setSessionTimeElapsed(prev => prev + 1);
+        if (sessionTimeElapsed >= totalTime && !sessionCompleted) {
+          setIsRunning(false);
+          setSessionCompleted(true);
+          toast.success('Session complete!');
+          onSessionComplete?.();
+          return;
+        }
+
+        const currentTask = tasks[currentTaskIndex];
+        if (currentTask) {
+          const taskDuration = isResting ? currentTask.rest_after || 0 : currentTask.duration;
+          const progress = taskDuration ? ((taskDuration - timeLeft) / taskDuration) * 100 : 0;
+          setProgressMap(prev => ({ ...prev, [currentTask.id]: Math.min(progress, 100) }));
+        }
 
         if (timeLeft > 0) {
           setTimeLeft(timeLeft - 1);
@@ -91,21 +104,7 @@ export const useTimer = (onSessionComplete?: () => void) => { // 🎯 Add callba
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [isRunning, isPaused, timeLeft, isResting, sessionTimeElapsed,
-     totalTime, tasks, currentTaskIndex, onSessionComplete, sessionCompleted]);
-
-  const nextTask = () => {
-    if (currentTaskIndex < tasks.length - 1) {
-      setCurrentTaskIndex(currentTaskIndex + 1);
-      setTimeLeft(tasks[currentTaskIndex + 1].duration);
-    } else {
-      setIsRunning(false);
-      setSessionCompleted(true); // 🎯 Prevent further calls
-      toast.success('Session complete!'); // 🎯 Toast instead of alert
-      playSound('session_complete');
-      onSessionComplete?.(); // 🎯 Call callback when all tasks done
-    }
-  };
+  }, [isRunning, isPaused, timeLeft, isResting, sessionTimeElapsed, totalTime, tasks, currentTaskIndex, onSessionComplete, sessionCompleted, nextTask]); // Added 'nextTask'
 
   const startTimer = () => {
     setSessionTimeElapsed(0);
@@ -131,7 +130,7 @@ export const useTimer = (onSessionComplete?: () => void) => { // 🎯 Add callba
     setTasks([...tasks, { id: Date.now().toString(), name: '', duration: 60 }]);
   };
 
-  const updateTask = (id: string, field: keyof Task, value: any) => {
+  const updateTask = (id: string, field: keyof Task, value: Task[keyof Task]) => { // Fixed: Use proper type instead of 'any'
     setTasks(tasks.map(task => task.id === id ? { ...task, [field]: value } : task));
   };
 
@@ -147,6 +146,7 @@ export const useTimer = (onSessionComplete?: () => void) => { // 🎯 Add callba
   const reorderTasks = (newOrder: Task[]) => {
     setTasks(newOrder);
   };
+
   return {
     tasks,
     setTasks,
