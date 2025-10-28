@@ -8,7 +8,7 @@ interface Note extends NoteData {
 }
 
 interface NoteListProps {
-  notes: Note[] | null; // Fixed: Complete the type (assuming null if not loaded)
+  notes: Note[] | undefined; 
   error: string | null; 
   onEdit: (note: Note) => void;
   onDelete: (note: Note) => void;

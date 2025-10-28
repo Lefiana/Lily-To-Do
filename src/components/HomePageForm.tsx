@@ -55,32 +55,32 @@ export function HomePageForm() {
             </div>
 
             {/* Footer */}
-            <div className="mt-12 text-center space-y-2">
-                <p className="text-gray-400 text-sm">
-                    © {new Date().getFullYear()} Lily. All rights reserved.
-                </p>
-                <p className="text-gray-500 text-xs leading-relaxed max-w-md mx-auto">
-                    Images and artwork are owned by their respective creators.  
-                    Majority of the visual assets featured in Lily are sourced from{" "}
-                    <a
-                        href="https://waifu.im"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-pink-400 hover:underline"
-                    >
-                        waifu.im
-                    </a>{" "}
-                    and{" "}
-                    <a
-                        href="https://wallhaven.cc"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-pink-400 hover:underline"
-                    >
-                        wallhaven.cc
-                    </a>.
-                </p>
-            </div>
+            <footer className="mt-12 text-center space-y-2 border-t border-white/10 pt-6">
+            <p className="text-gray-400 text-sm tracking-wide">
+                © {new Date().getFullYear()} <span className="font-semibold text-white">Lily</span>. All rights reserved.
+            </p>
+            <p className="text-gray-500 text-xs leading-relaxed max-w-lg mx-auto">
+                Images and artwork remain the property of their respective creators. <br className="hidden sm:block" />
+                Majority of the visual assets featured in Lily sourced from{" "}
+                <a
+                href="https://waifu.im"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-pink-400 hover:text-pink-300 hover:underline transition-colors"
+                >
+                waifu.im
+                </a>{" "}
+                and{" "}
+                <a
+                href="https://wallhaven.cc"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-pink-400 hover:text-pink-300 hover:underline transition-colors"
+                >
+                wallhaven.cc
+                </a>.
+            </p>
+            </footer>
         </div>
     );
 }

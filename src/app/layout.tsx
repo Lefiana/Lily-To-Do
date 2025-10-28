@@ -21,7 +21,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Lily",
   description: "A todo app and Gacha",
-};
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon0.svg", type: "image/svg+xml" },
+      { url: "/icon1.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
+  },
+  manifest: "/manifest.json",
+}
 
 export default function RootLayout({
   children,
