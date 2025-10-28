@@ -39,7 +39,7 @@ export const GachaAreaCard: React.FC = () => {
     setShowModal(false); // Close modal
   };
 
-  const gachaTitle = mode === 'manual' ? 'Manual Gacha! 🎉' : mode === 'public' ? 'Public Gacha! 🌐' : 'Wallhaven Gacha! 🖼️';
+  const gachaTitle = mode === 'manual' ? 'Custom Gacha! 🎉' : mode === 'public' ? 'Waifu.im Gacha! 🌐' : 'Wallhaven Gacha! 🖼️';
   const gachaImage = mode === 'manual' 
     ? 'https://res.cloudinary.com/dal65p2pp/image/upload/v1760884515/20241018_083250_-_Copy_npcsdf.jpg' 
     : mode === 'public' ? 'https://cdn.waifu.im/7497.jpg' : 'https://res.cloudinary.com/dal65p2pp/image/upload/v1760884086/sorry_chkqqt.png';
@@ -106,7 +106,7 @@ export const GachaAreaCard: React.FC = () => {
             disabled={isPulling || !canAfford}
             className={`w-full px-4 py-2 rounded-lg text-sm font-bold mb-2 ${
               canAfford && !isPulling
-                ? 'bg-custom-pink text-white hover:bg-pink-400 transition duration-150 button-theme-hover'
+                ? 'bg-manual-pink text-white hover:bg-pink-400 transition duration-150 button-theme-hover'
                 : 'bg-gray-500 text-gray-300 cursor-not-allowed'
             }`}
           >
@@ -121,7 +121,7 @@ export const GachaAreaCard: React.FC = () => {
             disabled={isPulling || !canAfford}
             className={`w-full px-4 py-2 rounded-lg text-sm font-bold mb-2 ${
               canAfford && !isPulling
-                ? 'bg-custom-pink text-white hover:bg-pink-400 transition duration-150 button-theme-hover'
+                ? 'bg-manual-pink text-white hover:bg-pink-400 transition duration-150 button-theme-hover'
                 : 'bg-gray-500 text-gray-300 cursor-not-allowed'
             }`}
           >
