@@ -1,7 +1,7 @@
 // src/components/dashboard/GachaResultModal.tsx
 "use client";
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { GlassCard } from './GlassCard';
 import Image from 'next/image';
 import { GachaResult } from '@/types/gacha';
@@ -13,6 +13,7 @@ interface GachaResultModalProps {
 
 export const GachaResultModal: React.FC<GachaResultModalProps> = ({ result, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [imageError, setImageError] = useState(false); // Track image load errors
 
   // Handle outside click to close
   useEffect(() => {
@@ -34,14 +35,22 @@ export const GachaResultModal: React.FC<GachaResultModalProps> = ({ result, onCl
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
       <GlassCard ref={modalRef} className="max-w-md w-full text-center">
         <h3 className="text-lg font-bold text-white mb-4">🎉 You Got!</h3>
-        {result.item?.imageURL && (
+        {result.item?.imageURL && !imageError && (
           <div className="relative h-40 w-40 mx-auto mb-4 rounded overflow-hidden border border-pink-500/50">
             <Image
               src={result.item.imageURL}
               alt={result.item.name || 'Item'}
               fill
               className="object-cover"
+              unoptimized // Allows proxy/external images without Next.js optimization
+              onError={() => setImageError(true)} // Handle load failures
+              priority // Loads immediately for modals
             />
+          </div>
+        )}
+        {imageError && (
+          <div className="relative h-40 w-40 mx-auto mb-4 rounded overflow-hidden border border-pink-500/50 bg-gray-700 flex items-center justify-center">
+            <span className="text-gray-400 text-sm">Image Unavailable</span>
           </div>
         )}
         <p className="text-white font-semibold">{result.item?.name || 'Unknown Item'}</p>

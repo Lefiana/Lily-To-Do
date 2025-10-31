@@ -98,20 +98,37 @@ export async function POST(_req: NextRequest) {  // Prefixed 'req' with '_' to i
       data: { amount: { decrement: WALLHAVEN_COST } },
     });
 
-    // Format as item
-    const wallhavenUrl = `https://wallhaven.cc/w/${randomImage.id}`; // Construct the Wallhaven page URL
+    // Construct URLs
+    const wallhavenUrl = `https://wallhaven.cc/w/${randomImage.id}`; // Always available
     const proxiedImageUrl = `/api/v1/proxy-image?url=${encodeURIComponent(randomImage.path)}`;
+
+    // Format description with clickable links
+    // Basic URL validation for source (simple check for http/https)
+    const isValidUrl = (url: string) => /^https?:\/\/.+/.test(url);
+    const sourceUrl = randomImage.source && isValidUrl(randomImage.source) ? randomImage.source : null;
+
+    let sourceLinks = '';
+    if (sourceUrl && wallhavenUrl) {
+      // Both available: Show both links
+      sourceLinks = `Source: <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Original</a> | <a href="${wallhavenUrl}" target="_blank" rel="noopener noreferrer">Wallhaven</a>`;
+    } else if (sourceUrl) {
+      // Only source: Show source link
+      sourceLinks = `Source: <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer">Original</a>`;
+    } else {
+      // Fallback to Wallhaven
+      sourceLinks = `Source: <a href="${wallhavenUrl}" target="_blank" rel="noopener noreferrer">Wallhaven</a>`;
+    }
+
     const itemData = {
       name: "Wallhaven Wallpaper",
       rarity: 1,
       imageURL: proxiedImageUrl, // Full image URL
-      description: `Wallpaper from Wallhaven.cc. Source: ${randomImage.source || wallhavenUrl}. 
-      Tags: ${randomImage.tags?.map((t: WallhavenTag) => t.name).join(', ')}.`,  // Proper typing for tags
+      description: `Wallpaper from Wallhaven.cc. ${sourceLinks}. Tags: ${randomImage.tags?.map((t: WallhavenTag) => t.name).join(', ') || 'None'}.`,  // Includes clickable links
     };
 
     // Save to DB
     const existingItem = await prisma.item.findFirst({  // Changed from 'let' to 'const'
-      where: { imageURL: randomImage.path },
+      where: { imageURL: randomImage.path },  // Note: Using original path for uniqueness check
     });
     let savedItem;
     if (existingItem) {

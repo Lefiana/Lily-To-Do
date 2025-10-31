@@ -6,7 +6,8 @@ import useSWR from 'swr';
 import { useEffect } from "react";
 import { ThemedBackgroundLayout } from "./ThemedBackgroundLayout";
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = (url: string) => 
+  fetch(url, { credentials: "include" }).then(res => res.json());
 
 export default function RootLayoutWrapper({ 
     children 

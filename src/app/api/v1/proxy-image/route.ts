@@ -1,5 +1,35 @@
-// app/api/v1/proxy-image/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+
+const ALLOWED_ORIGIN = 'https://w.wallhaven.cc/';
+const FETCH_TIMEOUT_MS = 30000; // Increased to 30 seconds for large images
+const MAX_RETRIES = 5; // Increased retries
+
+async function fetchWithTimeout(url: string, options: RequestInit, timeout = FETCH_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchWithRetry(url: string, options: RequestInit, retries = MAX_RETRIES): Promise<Response> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetchWithTimeout(url, options);
+      if (response.ok) return response;
+      console.warn(`Attempt ${attempt}: Fetch failed with status ${response.status} for ${url}`);
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.warn(`Attempt ${attempt}: Timeout fetching ${url}`);
+      } else {
+        console.warn(`Attempt ${attempt}: ${err.message}`);
+      }
+    }
+  }
+  throw new Error(`All ${retries} attempts failed for ${url}`);
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -9,39 +39,41 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing url parameter' }, { status: 400 });
   }
 
-  // Validate the URL to ensure it's from Wallhaven (security)
-  if (!imageUrl.startsWith('https://w.wallhaven.cc/')) {
+  if (!imageUrl.startsWith(ALLOWED_ORIGIN)) {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
   }
 
   try {
-    // Fetch the image from Wallhaven
-    const response = await fetch(imageUrl, {
+    const response = await fetchWithRetry(imageUrl, {
       headers: {
-        'User-Agent': 'Lily/1.0', // Optional: Spoof a user-agent to avoid blocks
-        'Referer': 'https://wallhaven.cc/', // Spoof referrer to mimic a direct visit
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Referer': 'https://wallhaven.cc/',
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'DNT': '1',
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.status}`);
+    const contentType = response.headers.get('Content-Type') || '';
+    if (!contentType.startsWith('image/')) {
+      throw new Error(`Invalid content type: ${contentType}`);
     }
 
-    // Get the image as a blob
-    const imageBlob = await response.blob();
+    // Check if body exists (rare, but defensive)
+    if (!response.body) {
+      throw new Error('Response body is null or empty');
+    }
 
-    // Return the image with CORS headers
-    return new NextResponse(imageBlob, {
+    // Stream the response instead of buffering
+    return new NextResponse(response.body, {
       headers: {
-        'Content-Type': response.headers.get('Content-Type') || 'image/jpeg',
-        'Access-Control-Allow-Origin': '*', // Allow all origins (or specify your domain)
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Cache-Control': 'public, max-age=3600', // Optional: Cache for 1 hour
+        'Content-Type': contentType,
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=3600',
       },
     });
-  } catch (error) {
-    console.error('Proxy error:', error);
-    return NextResponse.json({ error: 'Failed to proxy image' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Proxy error:', error.message);
+    return NextResponse.json({ error: 'Failed to fetch image', details: error.message }, { status: 502 });
   }
 }

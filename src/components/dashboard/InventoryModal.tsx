@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useRef, useEffect } from 'react';
-import Image from 'next/image'; // Add this for the <img> replacement
+import Image from 'next/image'; 
 import { GlassCard } from './GlassCard';
 import { useRouter } from 'next/navigation';
-import { InventoryItem } from '@/types/gacha'; // Add this import (adjust path if needed)
+import { InventoryItem } from '@/types/gacha'; 
+import DOMPurify from 'dompurify'; 
 
 interface InventoryModalProps {
-  inventory: InventoryItem[] | null; // Fixed: Use proper type instead of 'any[] | ;'
+  inventory: InventoryItem[] | null; 
   isLoading: boolean;
-  error: string | null; // Fixed: Use string | null instead of 'any'
+  error: string | null; 
   onClose: () => void;
 }
 
@@ -32,6 +33,9 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({ inventory, isLoa
   }, [onClose]);
 
   const [filter, setFilter] = React.useState<'all' | 'manual' | 'public' | 'wallhaven'>('all');
+
+  // New state for expandable descriptions
+  const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
 
   // Filter inventory based on selection
   const filteredInventory = inventory?.filter((item: InventoryItem) => { // Fixed: Use InventoryItem instead of 'any'
@@ -86,8 +90,8 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({ inventory, isLoa
             className="bg-gray-700 text-white px-2 py-1 rounded"
           >
             <option value="all">All</option>
-            <option value="manual">Manual Gacha</option>
-            <option value="public">Public Gacha</option>
+            <option value="manual">Custom Gacha</option>
+            <option value="public">Waifu.im Gacha</option>
             <option value="wallhaven">Wallhaven Gacha</option>
           </select>
         </div>
@@ -110,13 +114,35 @@ export const InventoryModal: React.FC<InventoryModalProps> = ({ inventory, isLoa
                         alt={item.name}
                         fill
                         className="object-cover"
+                        unoptimized 
                       />
                     </div>
                   )}
                   <p className="text-white font-semibold text-sm">{item.name}</p>
                   <p className="text-gray-300 text-xs">x{item.count}</p>
                   <p className="text-gray-400 text-xs">Rarity: {item.rarity}</p>
-                  {item.description && <p className="text-gray-300 text-xs mt-1 break-all overflow-hidden text-ellipsis">{item.description}</p>}
+                  {/* Updated: Expandable description with sanitization */}
+                  {item.description && (
+                    <div className="text-gray-300 text-xs mt-1">
+                      <p 
+                        className={`break-words whitespace-pre-wrap ${expandedItems.has(item.id) ? '' : 'line-clamp-2'}`} // Limit to 2 lines if not expanded
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.description) }}
+                      />
+                      {item.description.length > 100 && ( // Check length to show toggle (adjust threshold as needed)
+                        <button 
+                          onClick={() => setExpandedItems(prev => {
+                            const newSet = new Set(prev);
+                            if (newSet.has(item.id)) newSet.delete(item.id);
+                            else newSet.add(item.id);
+                            return newSet;
+                          })}
+                          className="text-pink-400 text-xs ml-1 hover:underline"
+                        >
+                          {expandedItems.has(item.id) ? 'Show Less' : 'Show More'}
+                        </button>
+                      )}
+                    </div>
+                  )}
                   {/* Buttons inside the item card */}
                   <div className="mt-2 flex flex-col space-y-1">
                     <button onClick={() => handleSetTheme(item.id)} className="bg-green-500 text-white px-2 py-1 rounded text-sm">

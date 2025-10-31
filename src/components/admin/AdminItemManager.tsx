@@ -60,7 +60,9 @@ export const AdminItemManager: React.FC = () => {
       if (response.ok) {
         mutate(); // Refresh the list
       } else {
-        alert('Error deleting item');
+        // Parse the error response for details
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        alert(`Error deleting item: ${errorData.error}`);
       }
     }
   };

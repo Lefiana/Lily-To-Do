@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRequiredAuth } from "@/lib/auth-helper";
 import { prisma } from "@/lib/prisma";
 import { extractDominantColors } from "@/services/color-extractor";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"; // Import for error handling
+
 // Define the required role for this protected route
 const ADMIN_ROLE = 'ADMIN'; 
 
@@ -127,22 +129,47 @@ export async function PATCH(req: NextRequest, props: Context) {
     }
 }
 
-export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const params = await context.params;
+/**
+ * DELETE /api/admin/items/[id]
+ * Delete a single item by ID (Admin access only).
+ * Handles cascading delete of related Gacha records to avoid foreign key constraints.
+ */
+export async function DELETE(req: NextRequest, props: Context) {
+    const params = await props.params;
+    try {
+        await getRequiredAuth(ADMIN_ROLE);
+        const { id } = params;
 
-  const todoId = params.id;
+        // Ensure the item exists before attempting to delete
+        await findItemOrThrow(id);
 
-  try {
-    await getRequiredAuth(ADMIN_ROLE);
-    // Delete the todo
-    await findItemOrThrow(params.id);
-    await prisma.todo.delete({
-      where: { id: todoId, }, // Ensure the todo belongs to the user
-    });
-    return NextResponse.json({ message: "Todo deleted successfully" }, { status: 200 });
-  } catch (error) {
-    console.error("Error deleting todo:", error);
-    // Handle case where todoId + userId combination is not found
-    return NextResponse.json({ error: "Todo not found or unauthorized" }, { status: 404 });
-  }
+        // First, delete all related Gacha records to avoid foreign key constraint
+        await prisma.gacha.deleteMany({
+            where: { itemId: id },
+        });
+
+        // Now delete the item (safe since related records are gone)
+        await prisma.item.delete({
+            where: { id },
+        });
+
+        return NextResponse.json({ message: "Item deleted successfully" }, { status: 200 });
+
+    } catch (error) {
+        if (error instanceof NextResponse) {
+            return error;
+        }
+        // Handle specific Prisma errors
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2003') {
+                // This shouldn't happen now, but just in case
+                return NextResponse.json({ error: "Cannot delete item because it is referenced by other records (e.g., in Gacha)." }, { status: 409 });
+            }
+            // Handle other known Prisma errors if needed
+            console.error("Prisma error deleting item:", error);
+            return NextResponse.json({ error: "Database error occurred while deleting item." }, { status: 500 });
+        }
+        console.error("Error deleting item:", error);
+        return NextResponse.json({ error: "Failed to delete item" }, { status: 500 });
+    }
 }
