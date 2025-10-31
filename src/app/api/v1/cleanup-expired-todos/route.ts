@@ -1,16 +1,20 @@
+// lily/src/app/api/v1/cleanup-expired-todos/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';  // Your Prisma client
 
-export async function GET() {
+export async function GET(req: Request) {
+  const secret = req.headers.get('x-cron-secret');
+  if (secret !== process.env.CRON_SECRET) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const now = new Date();
-    
-    // Bulk delete expired urgent tasks using Prisma
     const result = await prisma.todo.deleteMany({
       where: {
-        dailyQuest: true,      // Only urgent tasks
-        completed: false,      // Not completed
-        deadline: { lt: now }, // Deadline has passed
+        dailyQuest: true,
+        completed: false,
+        deadline: { lt: now },
       },
     });
 
