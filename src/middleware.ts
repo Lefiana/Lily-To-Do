@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { getTokenFromNextRequest } from "@/lib/getTokenEdge";
 
 export async function middleware(req: NextRequest) {
+  
   const token = await getTokenFromNextRequest(req);
   if (!token) {
     const url = new URL(req.url);
