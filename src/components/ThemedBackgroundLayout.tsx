@@ -1,11 +1,11 @@
-// themed-background-layout.tsx
-import React from 'react';
+"use client";
+import React, { useEffect, useState } from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
-  backgroundUrl?: string; // Cloudinary URL
-  color1?: string;      // Dominant color for first blob
-  color2?: string;      // Secondary color for second blob
+  backgroundUrl?: string;
+  color1?: string;
+  color2?: string;
 }
 
 export function ThemedBackgroundLayout({ 
@@ -14,55 +14,49 @@ export function ThemedBackgroundLayout({
   color1, 
   color2 
 }: LayoutProps) {
-  
-  // Define fallbacks for colors using your default theme colors
-  const defaultColor1 = '#57025a';
-  const defaultColor2 = '#ec4899';
-  
-  const blobColor1 = color1 || defaultColor1;
-  const blobColor2 = color2 || defaultColor2;
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Centralized Dynamic Styles: Set CSS Variables and the Background Image
-  // This is the only place we use the style prop, which is necessary for dynamic data.
+  useEffect(() => {
+    // Runs only on client
+    const checkScreen = () => setIsMobile(window.innerWidth < 768);
+    checkScreen();
+    window.addEventListener('resize', checkScreen);
+    return () => window.removeEventListener('resize', checkScreen);
+  }, []);
+
   const dynamicStyles = {
-    // 1. Inject custom colors as CSS Variables (Custom Properties)
-    '--blob-color-1': blobColor1,
-    '--blob-color-2': blobColor2,
-    backgroundSize: window.innerWidth < 768 ? 'contain' : 'cover',
-    backgroundPosition: 'center top', // Center the image
+    '--blob-color-1': color1 || '#57025a',
+    '--blob-color-2': color2 || '#ec4899',
+    backgroundSize: isMobile ? 'contain' : 'cover',
+    backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
-    // 2. Dynamic background image setting
-    ...(backgroundUrl && {
-      backgroundImage: `url('${backgroundUrl}')`,
-    }),
-  } as React.CSSProperties; // Type assertion for custom properties
+    ...(backgroundUrl && { backgroundImage: `url('${backgroundUrl}')` }),
+  } as React.CSSProperties;
 
   return (
-    // Outer container: Applies dynamic style and centering
     <div 
-      // Use bg-gray-900 as a fallback solid color if no image is provided
-      className={`relative flex items-center justify-center min-h-screen overflow-hidden p-6 ${!backgroundUrl ? 
-        'themed-background-container' 
-        : 'bg-gray-900' }`}
-      style={dynamicStyles} 
+      className={`relative flex items-center justify-center min-h-screen overflow-hidden p-6 ${
+        !backgroundUrl ? 'themed-background-container' : 'bg-gray-900'
+      }`}
+      style={dynamicStyles}
     >
-      
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-black/30 z-0" />
+
+      {/* Responsive Blobs */}
       <div 
         className="absolute w-[180px] h-[180px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px]
-                  rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse blob-color-1"
+                   rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse blob-color-1"
       />
       <div 
         className="absolute w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px]
-                  rounded-full blur-3xl opacity-30 bottom-10 right-10 animate-pulse delay-1000 blob-color-2"
+                   rounded-full blur-3xl opacity-30 bottom-10 right-10 animate-pulse delay-1000 blob-color-2"
       />
 
-      {/* Main content wrapper: Ensures children are vertically and horizontally centered.
-        mx-auto centers the block-level children (like your glass card).
-      */}
+      {/* Content wrapper */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 overflow-y-auto">
         {children}
       </div>
     </div>
   );
 }
-
