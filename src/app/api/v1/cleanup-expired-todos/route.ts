@@ -12,9 +12,8 @@ export async function GET(req: Request) {
     const now = new Date();
     const result = await prisma.todo.deleteMany({
       where: {
-        dailyQuest: true,
-        completed: false,
-        deadline: { lt: now },
+        completed: true,
+        updatedAt: { lt: now },
       },
     });
 
