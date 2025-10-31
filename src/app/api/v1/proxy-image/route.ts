@@ -20,16 +20,19 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = MAX_R
       const response = await fetchWithTimeout(url, options);
       if (response.ok) return response;
       console.warn(`Attempt ${attempt}: Fetch failed with status ${response.status} for ${url}`);
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
+    } catch (err: unknown) {  // Changed from 'any' to 'unknown' for type safety
+      if (err instanceof Error && err.name === 'AbortError') {
         console.warn(`Attempt ${attempt}: Timeout fetching ${url}`);
-      } else {
+      } else if (err instanceof Error) {
         console.warn(`Attempt ${attempt}: ${err.message}`);
+      } else {
+        console.warn(`Attempt ${attempt}: Unknown error occurred`);
       }
     }
   }
   throw new Error(`All ${retries} attempts failed for ${url}`);
 }
+
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -72,8 +75,10 @@ export async function GET(req: NextRequest) {
         'Cache-Control': 'public, max-age=3600',
       },
     });
-  } catch (error: any) {
-    console.error('Proxy error:', error.message);
-    return NextResponse.json({ error: 'Failed to fetch image', details: error.message }, { status: 502 });
+  } catch (error: unknown) {  // Changed from 'any' to 'unknown' for type safety
+    // Safely check if the error is an instance of Error
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('Proxy error:', errorMessage);
+    return NextResponse.json({ error: 'Failed to fetch image', details: errorMessage }, { status: 502 });
   }
 }
