@@ -1,3 +1,4 @@
+// themed-background-layout.tsx
 import React from 'react';
 
 interface LayoutProps {
@@ -27,7 +28,7 @@ export function ThemedBackgroundLayout({
     // 1. Inject custom colors as CSS Variables (Custom Properties)
     '--blob-color-1': blobColor1,
     '--blob-color-2': blobColor2,
-    backgroundSize: 'cover', // 🎯 Changed from 'cover' to 'contain' for full image visibility
+    backgroundSize: window.innerWidth < 768 ? 'contain' : 'cover',
     backgroundPosition: 'center top', // Center the image
     backgroundRepeat: 'no-repeat',
     // 2. Dynamic background image setting
@@ -35,6 +36,7 @@ export function ThemedBackgroundLayout({
       backgroundImage: `url('${backgroundUrl}')`,
     }),
   } as React.CSSProperties; // Type assertion for custom properties
+
   return (
     // Outer container: Applies dynamic style and centering
     <div 
@@ -46,17 +48,18 @@ export function ThemedBackgroundLayout({
     >
       
       <div 
-        className="absolute w-[300px] h-[300px] rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse blob-color-1"
+        className="absolute w-[180px] h-[180px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px]
+                  rounded-full blur-3xl opacity-30 top-10 left-10 animate-pulse blob-color-1"
       />
       <div 
-        className="absolute w-[320px] h-[320px] rounded-full blur-3xl opacity-30 bottom-10 right-10 
-        animate-pulse delay-1000 blob-color-2" 
+        className="absolute w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px]
+                  rounded-full blur-3xl opacity-30 bottom-10 right-10 animate-pulse delay-1000 blob-color-2"
       />
 
       {/* Main content wrapper: Ensures children are vertically and horizontally centered.
         mx-auto centers the block-level children (like your glass card).
       */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 overflow-y-auto">
         {children}
       </div>
     </div>
