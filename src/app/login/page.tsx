@@ -3,8 +3,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { LoginForm } from '@/components/auth/LoginForm';
-import '@/styles/login.css'; // ensure this path matches your setup
-
+import '@/styles/login.css';
 export default function LoginPage() {
   const { status } = useSession();
   const router = useRouter();
@@ -22,7 +21,7 @@ export default function LoginPage() {
   return (
     <div className="login-wrapper">
       <div className="card">
-        <LoginForm /> {/* ✅ Will use same form structure as reference */}
+        <LoginForm />
       </div>
     </div>
   );

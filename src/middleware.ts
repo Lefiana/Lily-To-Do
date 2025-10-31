@@ -1,17 +1,28 @@
-
-// src/middleware.ts
-import { auth } from "@/lib/auth"; // 1. Import the 'auth' object you exported in src/lib/auth.ts
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export default auth((req) => {
-    return NextResponse.next();
-});
+export async function middleware(req: any) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-// 3. Keep your matcher config
+  // Token missing or invalid → block access
+  if (!token) {
+    const url = new URL(req.url);
+
+    if (url.pathname.startsWith("/api/")) {
+      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Token is valid → continue
+  return NextResponse.next();
+}
+
 export const config = {
-    // This matcher tells Next.js which paths should run through this middleware
-    matcher: [
-        "/api/v1/:path*",
-        "/dashboard/:path*",
-    ],
+  matcher: ["/api/v1/:path*", "/dashboard/:path*"],
 };
