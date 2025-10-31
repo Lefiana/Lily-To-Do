@@ -23,5 +23,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/v1/:path*", "/api/admin/:path*", "/dashboard/:path*"],
+  matcher: ["api/v1/(?!cleanup-expired-todos).*", "/api/admin/:path*", "/dashboard/:path*"],
 };
