@@ -100,7 +100,7 @@ export const ToDoListCard: React.FC = () => {
                                 className={`flex-grow mx-4 flex flex-col justify-center relative min-w-0 
                                             ${todo.completed ? 'opacity-60 text-gray-400' : 'text-white'}`}
                             >
-                                <p className="text-base font-medium break-words">
+                                <p className="text-base font-medium break-normal">
                                     {todo.title}
                                 </p>
                                 

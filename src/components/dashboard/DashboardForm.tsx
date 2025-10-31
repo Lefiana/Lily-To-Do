@@ -23,7 +23,7 @@ export const DashboardContent = () => {
         </div>
 
         {/* Right column */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
+        <div className="lg:col-span-1 flex flex-col gap-6 self-start">
           <InventorySettingsCard />
           <GachaAreaCard />
         </div>
