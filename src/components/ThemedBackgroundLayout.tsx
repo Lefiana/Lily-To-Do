@@ -17,7 +17,6 @@ export function ThemedBackgroundLayout({
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Runs only on client
     const checkScreen = () => setIsMobile(window.innerWidth < 768);
     checkScreen();
     window.addEventListener('resize', checkScreen);
@@ -27,20 +26,21 @@ export function ThemedBackgroundLayout({
   const dynamicStyles = {
     '--blob-color-1': color1 || '#57025a',
     '--blob-color-2': color2 || '#ec4899',
-    backgroundSize: isMobile ? 'contain' : 'cover',
+    backgroundSize: isMobile ? 'cover' : 'cover', // keep full coverage for both
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed', // ✅ keeps background consistent on scroll
     ...(backgroundUrl && { backgroundImage: `url('${backgroundUrl}')` }),
   } as React.CSSProperties;
 
   return (
     <div 
-      className={`relative flex items-center justify-center min-h-screen overflow-hidden p-6 ${
+      className={`relative flex flex-col items-center justify-start min-h-full overflow-visible p-6 ${
         !backgroundUrl ? 'themed-background-container' : 'bg-gray-900'
       }`}
       style={dynamicStyles}
     >
-      {/* Overlay for better readability */}
+      {/* Overlay for readability */}
       <div className="absolute inset-0 bg-black/30 z-0" />
 
       {/* Responsive Blobs */}
@@ -54,7 +54,7 @@ export function ThemedBackgroundLayout({
       />
 
       {/* Content wrapper */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 overflow-y-auto">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-10">
         {children}
       </div>
     </div>
