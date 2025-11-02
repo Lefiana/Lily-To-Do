@@ -2,7 +2,10 @@
   "crons": [
     {
       "path": "/api/v1/cleanup-expired-todos",
-      "schedule": "0 16 * * *"
+      "schedule": "0 0 * * *",
+      "headers": {
+        "x-cron-secret": "@cron_secret"
+      }
     }
   ]
 }
