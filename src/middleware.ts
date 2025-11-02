@@ -7,7 +7,7 @@ export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     // 🧠 Skip middleware for cleanup-expired-todos route
-    if (pathname.startsWith("/api/v1/cleanup-expired-todos")) {
+    if (pathname.startsWith("/api/internal/cleanup-expired-todos")) {
         return NextResponse.next();
     }
     
